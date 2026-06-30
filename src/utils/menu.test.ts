@@ -139,7 +139,7 @@ describe("menu utilities", () => {
     const matched = getMatchingLibraryOption(dish, getRoleDishOptions(dish.role));
 
     expect(matched?.dishName).toBe("五香醬牛腱");
-    expect(getRoleDishOptions(dish.role)).toHaveLength(7);
+    expect(getRoleDishOptions(dish.role)).toHaveLength(8);
   });
 
   it("counts how many dishes differ from the default menu", () => {
@@ -223,7 +223,7 @@ describe("menu utilities", () => {
     expect(restored["【承啟中湯】湯品"]?.[0]?.dishName).toBe("竹笙瑤柱海鮮羹");
     expect(restored["【承啟中湯】湯品"]?.[0]?.role).toBe("【承啟中湯】湯品");
     expect(restored["【承啟中湯】湯品"]?.[0]?.cookingProfile).toBe("reheat-soup");
-    expect(restored["【迎賓冷盤一】迎賓冷盤"]?.length).toBe(7);
+    expect(restored["【迎賓冷盤一】迎賓冷盤"]?.length).toBe(8);
   });
 
   it("adds, updates and removes role library options", () => {
@@ -388,10 +388,14 @@ describe("menu utilities", () => {
     expect(prompt).toContain("is_leafy_green");
     expect(prompt).toContain("is_fried");
     expect(prompt).toContain("奶黃壽桃包");
+    expect(prompt).toContain("紅桂花酒釀圓子");
     expect(prompt).toContain("豉汁蒸石斑魚");
     expect(prompt).toContain("糖燻甘蔗雞");
     expect(prompt).toContain("酒釀乾燒大蝦");
     expect(prompt).toContain("桂花冰糖糯米藕");
+    expect(prompt).toContain("紹興醉蛋");
+    expect(prompt).toContain("白切雞");
+    expect(prompt).toContain("本幫紅燒肉");
     expect(prompt).toContain("川味椒麻拌牛肚");
     expect(prompt).toContain("雞湯煨雙冬");
     expect(prompt).toContain("揚州香蒜叉燒炒飯");
@@ -429,10 +433,14 @@ describe("menu utilities", () => {
     expect(exportJson).toContain("台式古早味高麗菜飯");
     expect(exportJson).toContain("雞湯煨雙冬");
     expect(exportJson).toContain("桂花冰糖糯米藕");
+    expect(exportJson).toContain("紹興醉蛋");
+    expect(exportJson).toContain("白切雞");
+    expect(exportJson).toContain("本幫紅燒肉");
     expect(exportJson).toContain("川味椒麻拌牛肚");
     expect(exportJson).toContain("糖燻甘蔗雞");
     expect(exportJson).toContain("酒釀乾燒大蝦");
     expect(exportJson).toContain("奶黃壽桃包");
+    expect(exportJson).toContain("紅桂花酒釀圓子");
     expect(exportJson).toContain("五味中卷");
     expect(exportJson).toContain("紅油拌腐竹");
     expect(exportJson).toContain("\"老醋陳皮拌雲耳\"");
