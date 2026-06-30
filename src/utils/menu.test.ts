@@ -240,11 +240,14 @@ describe("menu utilities", () => {
     expect(prompt).toContain("不需要拘泥於目前每個地位的候選數量");
     expect(prompt).toContain("系統設計面、資訊架構、欄位設計");
     expect(prompt).toContain("食材多樣性掃描");
+    expect(prompt).toContain("重複菜色掃描");
+    expect(prompt).toContain("高度預製適配性掃描");
     expect(prompt).toContain("標準化建檔 Schema");
     expect(prompt).toContain("[Context] 區塊");
     expect(prompt).toContain("食譜書／料理資料庫寫法");
     expect(prompt).toContain("宴席位階／分類名稱");
     expect(prompt).toContain("正式菜單分類、料理資料庫欄位");
+    expect(prompt).toContain("避免使用『融合菜』『創意菜』『私房菜』");
     expect(prompt).toContain("不要為了更好聽而任意升級食材");
     expect(prompt).toContain("系統設計改善清單");
     expect(prompt).toContain("問題、影響、改善方向、建議做法");
@@ -252,6 +255,7 @@ describe("menu utilities", () => {
     expect(prompt).toContain("鎮江排骨");
     expect(prompt).toContain("糖醋魚");
     expect(prompt).toContain("客家小炒");
+    expect(exportJson).toContain("西式料理");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"library\"");

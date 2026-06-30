@@ -168,7 +168,7 @@ export const roleDishLibrary: RoleDishLibrary = {
       libraryId: "vice-main-5",
       role: "【燒燴大菜】主菜",
       dishName: "紅酒燉牛小排",
-      cuisine: "融合菜",
+      cuisine: "西式料理",
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
