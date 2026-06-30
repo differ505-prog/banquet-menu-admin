@@ -232,6 +232,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("給 LLM 的覆核提示詞");
     expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
     expect(prompt).toContain("可直接複製貼給 IDE 的提示詞優化提示詞");
+    expect(prompt).toContain("主動擴增菜品庫");
+    expect(prompt).toContain("不需要拘泥於目前每個地位的候選數量");
     expect(prompt).toContain("不要混入菜庫資料修改內容");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"library\"");
