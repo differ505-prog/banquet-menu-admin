@@ -232,6 +232,7 @@ describe("menu utilities", () => {
     expect(prompt).toContain("目前系統使用的分類 Schema 對照如下");
     expect(prompt).toContain("Appetizer_Cold_1");
     expect(prompt).toContain("Main_Seafood");
+    expect(prompt).toContain("只接受中式料理體系");
     expect(prompt).toContain("整體評分（滿分 10 分");
     expect(prompt).toContain("給 LLM 的覆核提示詞");
     expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
@@ -248,6 +249,7 @@ describe("menu utilities", () => {
     expect(prompt).toContain("宴席位階／分類名稱");
     expect(prompt).toContain("正式菜單分類、料理資料庫欄位");
     expect(prompt).toContain("避免使用『融合菜』『創意菜』『私房菜』");
+    expect(prompt).toContain("偏離中式料理範圍的非中式分類");
     expect(prompt).toContain("不要為了更好聽而任意升級食材");
     expect(prompt).toContain("系統設計改善清單");
     expect(prompt).toContain("問題、影響、改善方向、建議做法");
@@ -255,7 +257,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("鎮江排骨");
     expect(prompt).toContain("糖醋魚");
     expect(prompt).toContain("客家小炒");
-    expect(exportJson).toContain("西式料理");
+    expect(exportJson).toContain("柱侯牛腩煲");
+    expect(exportJson).toContain("粵菜");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"library\"");
