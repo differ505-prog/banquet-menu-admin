@@ -253,8 +253,8 @@ export const getRoleSchemaCode = (role: string) => {
     return "Soup_Interlude";
   }
 
-  if (normalizedRole.includes("季節時蔬")) {
-    return "Vegetable_Seasonal";
+  if (normalizedRole.includes("季節時蔬") || normalizedRole.includes("燴扒蔬蕈")) {
+    return "Vegetable_Braised_Mushroom";
   }
 
   if (normalizedRole.includes("主食飯麵")) {
@@ -312,13 +312,13 @@ export const buildLibraryReviewPrompt = (library: RoleDishLibrary) => {
     "[Context & Constraints]",
     "- 料理體系：絕對純中式，允許正式、可見於食譜書與商業菜單資料庫的中式菜系與地方分支菜系，包含但不限於八大菜系、台菜、客家菜、本幫菜、潮州菜、京菜、大眾中式、中式點心。嚴禁西式、日式、南洋等異國元素及「融合菜」、「創意菜」。",
     "- 終端限制：高度依賴冷凍/冷藏預製包，終端覆熱設備僅限「瓦斯爐、電鍋、微波爐」。嚴禁需要烤箱、氣炸鍋或極度講究覆熱火候的菜色。",
-    "- 狀態辨識：請敏銳區分用戶輸入的是「候選菜庫（Pool）」還是「最終已選菜單（Final Menu）」。若是評估候選庫，應評估備選多樣性與同質性，且不可使用「同桌上菜將發生撞車」或類似語氣，而應使用「備選差異不足」或「候選同質性過高」等精確用詞。",
+    "- 狀態辨識：請敏銳區分用戶輸入的是「候選菜庫（Pool）」還是「最終已選菜單（Final Menu）」。在輸出任何評價前，必須先完成【強制狀態聲明】；若判定為 Pool，強制禁用『撞車』『重複度太高』『同桌上菜將發生撞車』等最終菜單語氣，改用『備選池同質性風險』『備選差異不足』『候選同質性過高』；若判定為 Final Menu，才可使用『菜色撞車』『味型失衡』『營養失衡』等最終成菜評語。",
     "- 菜系標註原則：若菜色已有明確且正式的地方菜系歸屬，應優先使用具體菜系名稱（如本幫菜、客家菜、潮州菜）；只有在無法準確細分時，才可收斂為「大眾中式」。",
     "- 刪除原則：只有在『同一道菜重複出現在不同分類』，或明確違反中式料理、終端設備、高預製適配性限制時，才可列入刪除或剔除名單。若只是食材、味型、烹法相近，應列為『同質性警告』，不可直接建議刪除。",
     "[Evaluation Process (4D Scan)]",
     "1. Diversity Scan（多樣性掃描）：檢查主食材、味型、烹法是否在同分類或跨分類中過度集中；若有，請標記『備選差異不足』或『候選同質性過高』。",
     "2. Schema Standardization（標準化掃描）：檢查菜名與菜系是否符合商業資料庫規範，並校正非正規菜系名稱；例如可將『涼拌』『傳統中式』等非正式標籤收斂為『大眾中式』。",
-    "3. Duplicate Scan（重複掃描）：嚴格確保同一道菜不可重複出現在不同分類中。只有『完全相同菜名的重複項』才屬於重複菜色，不可把風味相近、主食材相近、同菜系但不同菜名的菜直接判定為重複。",
+    "3. Duplicate Scan（重複掃描）：先檢查『完全相同菜名』是否跨分類重複，這屬於硬性重複；再檢查『核心食材 + 烹調法 + 味型』是否高度重疊。若是 Pool，後者只能列為『高危險同質警告』；若是 Final Menu，後者應列為『實質撞菜風險，建議強制替換其一』，但不得與完全相同菜名的硬性重複混為一談。",
     "4. Prep-Suitability Rule（高預製適配性掃描）：強制標記並剔除依賴高溫油炸求酥脆、覆熱易出水糊化、綠色葉菜類、或超出指定終端設備的菜品。",
     "請用繁體中文輸出，並嚴格依照以下格式回覆：",
     "[Output Format]",
@@ -329,7 +329,7 @@ export const buildLibraryReviewPrompt = (library: RoleDishLibrary) => {
     "5. 【擴增建議】（提供符合預製條件的替換/擴充菜品）",
     "6. 【可直接複製貼給 IDE 的菜庫修改提示詞】（彙整所有刪除、替換、改名、補充、增列事項，且提醒 IDE 不必拘泥於原先每個分類的候選數量；若只是同質性偏高，請改寫為補強多樣性建議，不可直接翻成刪菜指令）",
     "7. 【可直接複製貼給 IDE 的提示詞優化提示詞】（不要輸出完整版 Prompt；改為整理給 IDE 參考的提示詞修改建議，明確指出應修改的段落、原問題、建議寫法與預期效果。內容只處理 LLM 審核提示詞本身的優化，不要混入具體菜庫資料修改內容與系統架構設計內容）",
-    "8. 【可直接複製貼給 IDE 的架構設計提示詞】（專門整理 Schema 欄位、資料驗證、Pool/Final Menu 狀態分流、UI 流程、防呆規則、localStorage/版本控管等系統設計改善方向，不要混入具體菜色增刪名單）",
+    "8. 【可直接複製貼給 IDE 的架構設計提示詞】（專門整理系統設計改善方向，不要混入具體菜色增刪名單；至少涵蓋：新增 `prep_suitability_score`（1-5，低於 3 禁止存入 Pool）、新增 `reheat_methods`（綁定 `GAS_STOVE` / `RICE_COOKER` / `MICROWAVE`）、新增 `primary_ingredient` 與 `flavor_profile` 欄位、Pool Builder 的多樣性雷達圖與 Yellow Warning、Final Menu Generator 的互斥規則引擎、以及 `is_leafy_green` / `is_fried` 驗證攔截器）",
   ].join("\n");
 };
 
@@ -365,8 +365,8 @@ export const getGuestCourseLabel = (role: string) => {
     return "承啟中湯";
   }
 
-  if (normalizedRole.includes("季節時蔬")) {
-    return "季節時蔬";
+  if (normalizedRole.includes("季節時蔬") || normalizedRole.includes("燴扒蔬蕈")) {
+    return "燴扒蔬蕈";
   }
 
   if (normalizedRole.includes("主食飯麵")) {

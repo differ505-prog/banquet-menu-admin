@@ -106,6 +106,7 @@ describe("menu utilities", () => {
     expect(prompt).toContain("可見於食譜書與商業菜單資料庫");
     expect(prompt).toContain("本幫菜");
     expect(prompt).toContain("【海鮮大菜】主菜｜Schema:Main_Seafood｜破布子蒸午仔魚");
+    expect(prompt).toContain("【燴扒蔬蕈】蔬菜｜Schema:Vegetable_Braised_Mushroom｜上湯煨娃娃菜");
     expect(exportJson).toContain("\"title\": \"高預製度宴客菜單\"");
     expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"thawChecklist\"");
@@ -244,6 +245,7 @@ describe("menu utilities", () => {
     expect(prompt).toContain("目前系統使用的分類 Schema 對照如下");
     expect(prompt).toContain("Appetizer_Cold_1");
     expect(prompt).toContain("Main_Seafood");
+    expect(prompt).toContain("Vegetable_Braised_Mushroom");
     expect(prompt).toContain("[Context & Constraints]");
     expect(prompt).toContain("絕對純中式");
     expect(prompt).toContain("大眾中式");
@@ -262,11 +264,13 @@ describe("menu utilities", () => {
     expect(prompt).toContain("不必拘泥於原先每個分類的候選數量");
     expect(prompt).toContain("Diversity Scan（多樣性掃描）");
     expect(prompt).toContain("Duplicate Scan（重複掃描）");
-    expect(prompt).toContain("只有『完全相同菜名的重複項』才屬於重複菜色");
+    expect(prompt).toContain("先檢查『完全相同菜名』是否跨分類重複");
     expect(prompt).toContain("Prep-Suitability Rule（高預製適配性掃描）");
     expect(prompt).toContain("候選同質性過高");
     expect(prompt).toContain("備選差異不足");
     expect(prompt).toContain("若目前是候選菜庫");
+    expect(prompt).toContain("【強制狀態聲明】");
+    expect(prompt).toContain("備選池同質性風險");
     expect(prompt).toContain("同桌上菜將發生撞車");
     expect(prompt).toContain("同質性本身不得作為刪除理由");
     expect(prompt).toContain("若只是相近菜，應在本區提醒，不可移入刪除名單");
@@ -275,10 +279,19 @@ describe("menu utilities", () => {
     expect(prompt).toContain("嚴禁需要烤箱、氣炸鍋");
     expect(prompt).toContain("綠色葉菜類");
     expect(prompt).toContain("菜系標註原則");
+    expect(prompt).toContain("核心食材 + 烹調法 + 味型");
+    expect(prompt).toContain("實質撞菜風險，建議強制替換其一");
     expect(prompt).toContain("不要混入具體菜庫資料修改內容");
     expect(prompt).toContain("不可直接翻成刪菜指令");
     expect(prompt).toContain("不要混入具體菜色增刪名單");
-    expect(prompt).toContain("蒜蓉粿條蒸雪蟹腳");
+    expect(prompt).toContain("prep_suitability_score");
+    expect(prompt).toContain("reheat_methods");
+    expect(prompt).toContain("primary_ingredient");
+    expect(prompt).toContain("flavor_profile");
+    expect(prompt).toContain("Pool Builder 的多樣性雷達圖");
+    expect(prompt).toContain("Final Menu Generator 的互斥規則引擎");
+    expect(prompt).toContain("is_leafy_green");
+    expect(prompt).toContain("is_fried");
     expect(prompt).toContain("栗子燒黃燜雞");
     expect(prompt).toContain("百合銀耳燉雪蛤");
     expect(prompt).toContain("鎮江排骨");
@@ -286,7 +299,9 @@ describe("menu utilities", () => {
     expect(prompt).not.toContain("干燒伊麵");
     expect(prompt).not.toContain("家鄉臘味煲仔飯");
     expect(prompt).not.toContain("芋泥椰汁西米露");
+    expect(prompt).not.toContain("蒜蓉粿條蒸雪蟹腳");
     expect(prompt).toContain("承啟中湯");
+    expect(prompt).toContain("燴扒蔬蕈");
     expect(prompt).toContain("壓軸大湯");
     expect(prompt).toContain("晏尾甜品");
     expect(exportJson).toContain("柱侯蘿蔔燉牛腩");
@@ -295,19 +310,29 @@ describe("menu utilities", () => {
     expect(exportJson).toContain("台式紅燒羊腩煲");
     expect(exportJson).toContain("蟹黃燴芙蓉豆腐");
     expect(exportJson).toContain("鮑汁燴花膠海參");
+    expect(exportJson).toContain("樹子冬瓜蒸海鱸魚");
     expect(exportJson).toContain("黑椒牛柳杏鮑菇");
+    expect(exportJson).toContain("蟲草花金針蒸滑雞");
     expect(exportJson).toContain("扁尖筍百葉燒毛豆");
+    expect(exportJson).toContain("白果烤麩");
+    expect(exportJson).toContain("麻油猴頭菇");
     expect(exportJson).toContain("上海蔥油拌麵");
+    expect(exportJson).toContain("XO醬海鮮炒飯");
+    expect(exportJson).toContain("台式家常炒麵");
+    expect(exportJson).toContain("五味中卷");
+    expect(exportJson).toContain("紅油拌腐竹");
     expect(exportJson).toContain("\"老醋陳皮拌雲耳\"");
-    expect(exportJson).toContain("\"cuisine\": \"江浙菜\"");
+    expect(exportJson).toContain("\"role\": \"【燴扒蔬蕈】蔬菜\"");
     expect(exportJson).toContain("粵菜");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"library\"");
     expect(exportJson).not.toContain("左宗棠雞");
+    expect(exportJson).not.toContain("金沙南瓜焗蟹塊");
     expect(exportJson).not.toContain("藤椒酸菜煮魚片");
     expect(exportJson).not.toContain("干貝高湯燴刈菜");
     expect(exportJson).not.toContain("家鄉干貝炒伊麵");
+    expect(exportJson).not.toContain("蒜蓉粿條蒸雪蟹腳");
   });
 
   it("invalidates persisted workspace when default data version changes", () => {
@@ -354,6 +379,8 @@ describe("menu utilities", () => {
 
   it("maps banquet roles to guest-facing course labels", () => {
     expect(getGuestCourseLabel("【海鮮大菜】主菜")).toBe("海鮮大菜");
+    expect(getGuestCourseLabel("【季節時蔬】蔬菜")).toBe("燴扒蔬蕈");
+    expect(getGuestCourseLabel("【燴扒蔬蕈】蔬菜")).toBe("燴扒蔬蕈");
     expect(getGuestCourseLabel("【中式甜品】甜品")).toBe("晏尾甜品");
     expect(getGuestCourseLabel("【晏尾甜品】甜品")).toBe("晏尾甜品");
   });
@@ -363,6 +390,7 @@ describe("menu utilities", () => {
 
     expect(guestMenuText).toContain("私宴菜單");
     expect(guestMenuText).toContain("海鮮大菜｜破布子蒸午仔魚");
+    expect(guestMenuText).toContain("燴扒蔬蕈｜上湯煨娃娃菜");
     expect(guestMenuText).not.toContain("預製度");
   });
 

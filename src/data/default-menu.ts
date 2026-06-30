@@ -48,7 +48,7 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "6",
-    role: "【季節時蔬】蔬菜",
+    role: "【燴扒蔬蕈】蔬菜",
     dishName: "上湯煨娃娃菜",
     cuisine: "粵菜",
     premadeLevel: "電鍋/微波加熱",

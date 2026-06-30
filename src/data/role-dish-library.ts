@@ -4,6 +4,7 @@ const roleAliasMap: Record<string, string> = {
   "【中場過場湯】湯品": "【承啟中湯】湯品",
   "【壓軸燉湯】湯品": "【壓軸大湯】湯品",
   "【中式甜品】甜品": "【晏尾甜品】甜品",
+  "【季節時蔬】蔬菜": "【燴扒蔬蕈】蔬菜",
 };
 
 export const normalizeRoleName = (role: string) => roleAliasMap[role] ?? role;
@@ -41,7 +42,7 @@ const getRoleDefaultProfiles = (role: string) => {
     return { thawProfile: "meat", cookingProfile: "reheat-soup" } as const;
   }
 
-  if (normalizedRole.includes("季節時蔬")) {
+  if (normalizedRole.includes("季節時蔬") || normalizedRole.includes("燴扒蔬蕈")) {
     return { thawProfile: "other", cookingProfile: "reheat-veg" } as const;
   }
 
@@ -106,7 +107,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     {
       libraryId: "left-cold-7",
       role: "【迎賓冷盤一】迎賓冷盤",
-      dishName: "麻辣涼拌腐竹",
+      dishName: "紅油拌腐竹",
       cuisine: "川菜",
       premadeLevel: "解凍即食",
       thawProfile: "other",
@@ -135,7 +136,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     {
       libraryId: "right-cold-4",
       role: "【迎賓冷盤二】迎賓冷盤",
-      dishName: "五味冰卷",
+      dishName: "五味中卷",
       cuisine: "台菜",
       premadeLevel: "解凍即食",
       thawProfile: "other",
@@ -260,6 +261,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
     },
+    {
+      libraryId: "vice-main-14",
+      role: "【燒燴大菜】主菜",
+      dishName: "蟲草花金針蒸滑雞",
+      cuisine: "粵菜",
+      premadeLevel: "電鍋/瓦斯爐加熱",
+      thawProfile: "meat",
+      cookingProfile: "reheat-braise",
+    },
   ],
   "【海鮮大菜】主菜": [
     {
@@ -326,15 +336,6 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "steam-fish",
     },
     {
-      libraryId: "main-fish-11",
-      role: "【海鮮大菜】主菜",
-      dishName: "蒜蓉粿條蒸雪蟹腳",
-      cuisine: "粵菜",
-      premadeLevel: "電鍋蒸熱",
-      thawProfile: "other",
-      cookingProfile: "steam-fish",
-    },
-    {
       libraryId: "main-fish-12",
       role: "【海鮮大菜】主菜",
       dishName: "剁椒蒸魚頭",
@@ -360,6 +361,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "電鍋/瓦斯爐加熱",
       thawProfile: "other",
       cookingProfile: "reheat-braise",
+    },
+    {
+      libraryId: "main-fish-15",
+      role: "【海鮮大菜】主菜",
+      dishName: "樹子冬瓜蒸海鱸魚",
+      cuisine: "台菜",
+      premadeLevel: "電鍋/瓦斯爐加熱",
+      thawProfile: "fish",
+      cookingProfile: "steam-fish",
     },
   ],
   "【承啟中湯】湯品": [
@@ -400,10 +410,10 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "reheat-soup",
     },
   ],
-  "【季節時蔬】蔬菜": [
+  "【燴扒蔬蕈】蔬菜": [
     {
       libraryId: "veg-1",
-      role: "【季節時蔬】蔬菜",
+      role: "【燴扒蔬蕈】蔬菜",
       dishName: "上湯煨娃娃菜",
       cuisine: "粵菜",
       premadeLevel: "電鍋/微波加熱",
@@ -412,7 +422,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "veg-6",
-      role: "【季節時蔬】蔬菜",
+      role: "【燴扒蔬蕈】蔬菜",
       dishName: "蟹黃燴芙蓉豆腐",
       cuisine: "江浙菜",
       premadeLevel: "微波/瓦斯爐加熱",
@@ -421,7 +431,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "veg-7",
-      role: "【季節時蔬】蔬菜",
+      role: "【燴扒蔬蕈】蔬菜",
       dishName: "蠔油扒北菇",
       cuisine: "粵菜",
       premadeLevel: "微波/電鍋加熱",
@@ -430,7 +440,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "veg-8",
-      role: "【季節時蔬】蔬菜",
+      role: "【燴扒蔬蕈】蔬菜",
       dishName: "金湯蟹粉扒南瓜",
       cuisine: "粵菜",
       premadeLevel: "微波/電鍋加熱",
@@ -439,7 +449,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "veg-9",
-      role: "【季節時蔬】蔬菜",
+      role: "【燴扒蔬蕈】蔬菜",
       dishName: "上湯雪菜百葉",
       cuisine: "江浙菜",
       premadeLevel: "微波/瓦斯爐加熱",
@@ -448,10 +458,28 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "veg-10",
-      role: "【季節時蔬】蔬菜",
+      role: "【燴扒蔬蕈】蔬菜",
       dishName: "扁尖筍百葉燒毛豆",
       cuisine: "江浙菜",
       premadeLevel: "微波/電鍋加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+    },
+    {
+      libraryId: "veg-11",
+      role: "【燴扒蔬蕈】蔬菜",
+      dishName: "白果烤麩",
+      cuisine: "本幫菜",
+      premadeLevel: "微波/電鍋加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+    },
+    {
+      libraryId: "veg-12",
+      role: "【燴扒蔬蕈】蔬菜",
+      dishName: "麻油猴頭菇",
+      cuisine: "台菜",
+      premadeLevel: "微波/瓦斯爐加熱",
       thawProfile: "other",
       cookingProfile: "reheat-veg",
     },
@@ -516,6 +544,24 @@ export const roleDishLibrary: RoleDishLibrary = {
       role: "【主食飯麵】主食",
       dishName: "上海蔥油拌麵",
       cuisine: "江浙菜",
+      premadeLevel: "微波加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-13",
+      role: "【主食飯麵】主食",
+      dishName: "XO醬海鮮炒飯",
+      cuisine: "粵菜",
+      premadeLevel: "微波加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-14",
+      role: "【主食飯麵】主食",
+      dishName: "台式家常炒麵",
+      cuisine: "台菜",
       premadeLevel: "微波加熱",
       thawProfile: "other",
       cookingProfile: "reheat-rice",
