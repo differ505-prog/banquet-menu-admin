@@ -195,7 +195,7 @@ export const buildEvaluationPrompt = (dishes: MenuDish[]) => {
   const menuLines = dishes
     .map(
       (dish, index) =>
-        `${index + 1}. ${dish.role}｜${dish.dishName}｜${dish.cuisine}｜${dish.premadeLevel}`,
+        `${index + 1}. ${dish.role}｜Schema:${getRoleSchemaCode(dish.role)}｜${dish.dishName}｜${dish.cuisine}｜${dish.premadeLevel}`,
     )
     .join("\n");
 
@@ -211,6 +211,7 @@ export const buildExportJson = (dishes: MenuDish[]) =>
     {
       title: "高預製度宴客菜單",
       summary: buildMenuSummary(dishes),
+      roleSchema: buildRoleSchemaEntries(dishes.map((dish) => dish.role)),
       dishes,
       prompt: buildEvaluationPrompt(dishes),
       thawGuide: buildThawGuideText(),
@@ -222,12 +223,61 @@ export const buildExportJson = (dishes: MenuDish[]) =>
     2,
   );
 
+export const getRoleSchemaCode = (role: string) => {
+  if (role.includes("迎賓冷盤一")) {
+    return "Appetizer_Cold_1";
+  }
+
+  if (role.includes("迎賓冷盤二")) {
+    return "Appetizer_Cold_2";
+  }
+
+  if (role.includes("燒燴大菜")) {
+    return "Main_Braised";
+  }
+
+  if (role.includes("海鮮大菜")) {
+    return "Main_Seafood";
+  }
+
+  if (role.includes("中場過場湯")) {
+    return "Soup_Interlude";
+  }
+
+  if (role.includes("季節時蔬")) {
+    return "Vegetable_Seasonal";
+  }
+
+  if (role.includes("主食飯麵")) {
+    return "Staple_Rice_Noodles";
+  }
+
+  if (role.includes("壓軸燉湯")) {
+    return "Soup_Final";
+  }
+
+  if (role.includes("中式甜品")) {
+    return "Dessert_Chinese";
+  }
+
+  return "Banquet_Other";
+};
+
+export const buildRoleSchemaEntries = (roles: string[]) =>
+  Array.from(new Set(roles)).map((role) => ({
+    role,
+    schemaCode: getRoleSchemaCode(role),
+  }));
+
 export const buildLibrarySummary = (library: RoleDishLibrary) =>
   Object.entries(library)
     .map(([role, options]) => `${role} 共 ${options.length} 道候選`)
     .join("、");
 
 export const buildLibraryReviewPrompt = (library: RoleDishLibrary) => {
+  const schemaLines = buildRoleSchemaEntries(Object.keys(library))
+    .map((entry) => `- ${entry.role} => ${entry.schemaCode}`)
+    .join("\n");
   const libraryLines = Object.entries(library)
     .map(([role, options]) => {
       const optionLines = options
@@ -243,6 +293,8 @@ export const buildLibraryReviewPrompt = (library: RoleDishLibrary) => {
 
   return [
     "請你以中式宴席顧問、菜系研究者、宴客結構規劃師與提示詞優化顧問的角度，覆核以下同地位候選菜庫：",
+    "目前系統使用的分類 Schema 對照如下：",
+    schemaLines,
     libraryLines,
     "請用繁體中文輸出，並嚴格依照以下格式回覆：",
     "1. 先給這份菜庫整體評分（滿分 10 分，可含小數），並說明評分理由，至少涵蓋：宴席地位適配度、菜系合理性、預製度合理性、菜名標準性、候選完整性。",
@@ -261,6 +313,7 @@ export const buildLibraryExportJson = (library: RoleDishLibrary) =>
     {
       title: "高預製度宴客候選菜庫",
       summary: buildLibrarySummary(library),
+      roleSchema: buildRoleSchemaEntries(Object.keys(library)),
       library,
       prompt: buildLibraryReviewPrompt(library),
     },

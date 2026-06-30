@@ -95,8 +95,9 @@ describe("menu utilities", () => {
     expect(summary).toContain("本宴客菜單共 9 道");
     expect(summary).toContain("魚蝦肉冷凍食");
     expect(prompt).toContain("請你以宴客顧問與備餐流程規劃師的角度");
-    expect(prompt).toContain("【海鮮大菜】主菜｜破布子蒸午仔魚");
+    expect(prompt).toContain("【海鮮大菜】主菜｜Schema:Main_Seafood｜破布子蒸午仔魚");
     expect(exportJson).toContain("\"title\": \"高預製度宴客菜單\"");
+    expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"thawChecklist\"");
     expect(exportJson).toContain("\"cookingChecklist\"");
   });
@@ -228,6 +229,9 @@ describe("menu utilities", () => {
 
     expect(prompt).toContain("請你以中式宴席顧問");
     expect(prompt).toContain("【海鮮大菜】主菜");
+    expect(prompt).toContain("目前系統使用的分類 Schema 對照如下");
+    expect(prompt).toContain("Appetizer_Cold_1");
+    expect(prompt).toContain("Main_Seafood");
     expect(prompt).toContain("整體評分（滿分 10 分");
     expect(prompt).toContain("給 LLM 的覆核提示詞");
     expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
@@ -246,6 +250,7 @@ describe("menu utilities", () => {
     expect(prompt).toContain("問題、影響、改善方向、建議做法");
     expect(prompt).toContain("不要混入具體菜庫資料修改內容");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
+    expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"library\"");
   });
 
