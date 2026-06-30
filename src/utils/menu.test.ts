@@ -249,6 +249,9 @@ describe("menu utilities", () => {
     expect(prompt).toContain("系統設計改善清單");
     expect(prompt).toContain("問題、影響、改善方向、建議做法");
     expect(prompt).toContain("不要混入具體菜庫資料修改內容");
+    expect(prompt).toContain("鎮江排骨");
+    expect(prompt).toContain("糖醋魚");
+    expect(prompt).toContain("客家小炒");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"library\"");
