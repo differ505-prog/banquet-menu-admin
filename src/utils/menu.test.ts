@@ -241,6 +241,7 @@ describe("menu utilities", () => {
     expect(prompt).toContain("絕對純中式");
     expect(prompt).toContain("大眾中式");
     expect(prompt).toContain("候選菜庫（Pool）");
+    expect(prompt).toContain("只有在『同一道菜重複出現在不同分類』");
     expect(prompt).toContain("[Evaluation Process (4D Scan)]");
     expect(prompt).toContain("[Output Format]");
     expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
@@ -248,16 +249,20 @@ describe("menu utilities", () => {
     expect(prompt).toContain("不必拘泥於原先每個分類的候選數量");
     expect(prompt).toContain("Diversity Scan（多樣性掃描）");
     expect(prompt).toContain("Duplicate Scan（重複掃描）");
+    expect(prompt).toContain("只有『完全相同菜名的重複項』才屬於重複菜色");
     expect(prompt).toContain("Prep-Suitability Rule（高預製適配性掃描）");
     expect(prompt).toContain("候選同質性過高");
     expect(prompt).toContain("備選差異不足");
     expect(prompt).toContain("若目前是候選菜庫");
     expect(prompt).toContain("同桌上菜將發生撞車");
+    expect(prompt).toContain("同質性本身不得作為刪除理由");
+    expect(prompt).toContain("若只是相近菜，應在本區提醒，不可移入刪除名單");
     expect(prompt).toContain("Schema Standardization（標準化掃描）");
     expect(prompt).toContain("嚴禁西式、日式、南洋等異國元素");
     expect(prompt).toContain("嚴禁需要烤箱、氣炸鍋");
     expect(prompt).toContain("綠色葉菜類");
     expect(prompt).toContain("不要混入具體菜庫資料修改內容");
+    expect(prompt).toContain("不可直接翻成刪菜指令");
     expect(prompt).toContain("蒜蓉粿條蒸雪蟹腳");
     expect(prompt).toContain("栗子燒黃燜雞");
     expect(prompt).toContain("百合銀耳燉雪蛤");
