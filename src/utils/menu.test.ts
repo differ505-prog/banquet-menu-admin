@@ -121,7 +121,7 @@ describe("menu utilities", () => {
     const matched = getMatchingLibraryOption(dish, getRoleDishOptions(dish.role));
 
     expect(matched?.dishName).toBe("五香醬牛腱");
-    expect(getRoleDishOptions(dish.role)).toHaveLength(5);
+    expect(getRoleDishOptions(dish.role)).toHaveLength(6);
   });
 
   it("counts how many dishes differ from the default menu", () => {
@@ -188,28 +188,28 @@ describe("menu utilities", () => {
   it("sanitizes stored role library and keeps fallback roles", () => {
     const restored = sanitizeRoleDishLibrary(
       {
-        "【海鮮大菜】主菜": [
+        "【中場過場湯】湯品": [
           {
-            libraryId: "custom-main-1",
-            role: "【海鮮大菜】主菜",
-            dishName: "乾燒黃魚",
-            cuisine: "江浙菜",
-            premadeLevel: "電鍋蒸熱",
-            cookingProfile: "steam-fish",
+            libraryId: "custom-soup-1",
+            role: "【中場過場湯】湯品",
+            dishName: "竹笙瑤柱海鮮羹",
+            cuisine: "粵菜",
+            premadeLevel: "瓦斯爐加熱",
+            cookingProfile: "reheat-soup",
           },
         ],
       },
       cloneRoleDishLibrary(),
     );
 
-    expect(restored["【海鮮大菜】主菜"]?.[0]?.dishName).toBe("乾燒黃魚");
-    expect(restored["【海鮮大菜】主菜"]?.[0]?.thawProfile).toBe("fish");
-    expect(restored["【海鮮大菜】主菜"]?.[0]?.cookingProfile).toBe("steam-fish");
-    expect(restored["【迎賓冷盤一】迎賓冷盤"]?.length).toBe(5);
+    expect(restored["【承啟中湯】湯品"]?.[0]?.dishName).toBe("竹笙瑤柱海鮮羹");
+    expect(restored["【承啟中湯】湯品"]?.[0]?.role).toBe("【承啟中湯】湯品");
+    expect(restored["【承啟中湯】湯品"]?.[0]?.cookingProfile).toBe("reheat-soup");
+    expect(restored["【迎賓冷盤一】迎賓冷盤"]?.length).toBe(6);
   });
 
   it("adds, updates and removes role library options", () => {
-    const role = "【中式甜品】甜品";
+    const role = "【晏尾甜品】甜品";
     const created = createEmptyRoleDishOption(role);
     const added = addRoleDishOption(cloneRoleDishLibrary(), role, created);
     const updated = updateRoleDishOption(added, role, created.libraryId, "dishName", "桂花酒釀湯圓");
@@ -227,43 +227,37 @@ describe("menu utilities", () => {
     const prompt = buildLibraryReviewPrompt(library);
     const exportJson = buildLibraryExportJson(library);
 
-    expect(prompt).toContain("請你以中式宴席顧問");
+    expect(prompt).toContain("請你以中式宴席資料庫架構師");
     expect(prompt).toContain("【海鮮大菜】主菜");
     expect(prompt).toContain("目前系統使用的分類 Schema 對照如下");
     expect(prompt).toContain("Appetizer_Cold_1");
     expect(prompt).toContain("Main_Seafood");
-    expect(prompt).toContain("只接受中式料理體系");
-    expect(prompt).toContain("請分清楚『候選菜庫覆核』與『最終菜單覆核』");
-    expect(prompt).toContain("不可直接把同分類候選的相似性判定為最終上桌菜單已撞車");
+    expect(prompt).toContain("[Context]");
+    expect(prompt).toContain("純中式料理");
+    expect(prompt).toContain("大眾中式");
     expect(prompt).toContain("整體評分（滿分 10 分");
-    expect(prompt).toContain("給 LLM 的覆核提示詞");
+    expect(prompt).toContain("四項強制掃描");
     expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
     expect(prompt).toContain("可直接複製貼給 IDE 的提示詞優化提示詞");
-    expect(prompt).toContain("主動擴增菜品庫");
-    expect(prompt).toContain("不需要拘泥於目前每個地位的候選數量");
-    expect(prompt).toContain("系統設計面、資訊架構、欄位設計");
-    expect(prompt).toContain("食材多樣性掃描");
+    expect(prompt).toContain("不需要拘泥於目前每個分類的候選數量");
+    expect(prompt).toContain("食材多樣性防撞車掃描");
     expect(prompt).toContain("重複菜色掃描");
-    expect(prompt).toContain("高度預製適配性掃描");
+    expect(prompt).toContain("高度預製適配性剔除規則");
     expect(prompt).toContain("候選同質性過高");
     expect(prompt).toContain("備選差異不足");
     expect(prompt).toContain("你現在不是在模擬最終抽選結果");
-    expect(prompt).toContain("不要使用『若隨機抽選』『極易撞車』");
+    expect(prompt).toContain("若隨機抽選");
     expect(prompt).toContain("標準化建檔 Schema");
-    expect(prompt).toContain("[Context] 區塊");
-    expect(prompt).toContain("食譜書／料理資料庫寫法");
-    expect(prompt).toContain("宴席位階／分類名稱");
-    expect(prompt).toContain("正式菜單分類、料理資料庫欄位");
-    expect(prompt).toContain("避免使用『融合菜』『創意菜』『私房菜』");
-    expect(prompt).toContain("偏離中式料理範圍的非中式分類");
+    expect(prompt).toContain("禁止使用『融合菜』『創意菜』『私房菜』");
     expect(prompt).toContain("不要為了更好聽而任意升級食材");
-    expect(prompt).toContain("系統設計改善清單");
-    expect(prompt).toContain("問題、影響、改善方向、建議做法");
-    expect(prompt).toContain("不要混入具體菜庫資料修改內容");
+    expect(prompt).toContain("但不要混入具體菜庫資料修改內容");
     expect(prompt).toContain("鎮江排骨");
-    expect(prompt).toContain("糖醋魚");
+    expect(prompt).not.toContain("糖醋魚");
     expect(prompt).toContain("客家小炒");
-    expect(exportJson).toContain("柱侯牛腩煲");
+    expect(prompt).toContain("承啟中湯");
+    expect(prompt).toContain("壓軸大湯");
+    expect(prompt).toContain("晏尾甜品");
+    expect(exportJson).toContain("柱侯蘿蔔牛腩煲");
     expect(exportJson).toContain("粵菜");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"roleSchema\"");
@@ -272,7 +266,8 @@ describe("menu utilities", () => {
 
   it("maps banquet roles to guest-facing course labels", () => {
     expect(getGuestCourseLabel("【海鮮大菜】主菜")).toBe("海鮮大菜");
-    expect(getGuestCourseLabel("【中式甜品】甜品")).toBe("中式甜品");
+    expect(getGuestCourseLabel("【中式甜品】甜品")).toBe("晏尾甜品");
+    expect(getGuestCourseLabel("【晏尾甜品】甜品")).toBe("晏尾甜品");
   });
 
   it("builds guest-facing menu text without backend terms", () => {

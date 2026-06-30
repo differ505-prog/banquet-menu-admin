@@ -39,7 +39,7 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "5",
-    role: "【中場過場湯】湯品",
+    role: "【承啟中湯】湯品",
     dishName: "清燉獅子頭",
     cuisine: "淮揚菜",
     premadeLevel: "瓦斯爐加熱",
@@ -66,7 +66,7 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "8",
-    role: "【壓軸燉湯】湯品",
+    role: "【壓軸大湯】湯品",
     dishName: "原盅蒜頭燉土雞湯",
     cuisine: "台菜",
     premadeLevel: "瓦斯爐加熱",
@@ -75,9 +75,9 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "9",
-    role: "【中式甜品】甜品",
+    role: "【晏尾甜品】甜品",
     dishName: "冰糖紫米紅豆湯",
-    cuisine: "傳統中式",
+    cuisine: "大眾中式",
     premadeLevel: "電鍋蒸熱",
     thawProfile: "other",
     cookingProfile: "steam-dessert",

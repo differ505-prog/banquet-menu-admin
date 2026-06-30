@@ -13,6 +13,7 @@ import type {
   RoleDishOption,
 } from "@/types/menu";
 import { cookingGuides } from "../data/cooking-guides";
+import { getEquivalentRoleNames, normalizeRoleName } from "../data/role-dish-library";
 import { thawGuides, thawGuideMap } from "../data/thaw-guides";
 
 const isThawProfileKey = (value: unknown): value is ThawProfileKey =>
@@ -225,39 +226,41 @@ export const buildExportJson = (dishes: MenuDish[]) =>
   );
 
 export const getRoleSchemaCode = (role: string) => {
-  if (role.includes("迎賓冷盤一")) {
+  const normalizedRole = normalizeRoleName(role);
+
+  if (normalizedRole.includes("迎賓冷盤一")) {
     return "Appetizer_Cold_1";
   }
 
-  if (role.includes("迎賓冷盤二")) {
+  if (normalizedRole.includes("迎賓冷盤二")) {
     return "Appetizer_Cold_2";
   }
 
-  if (role.includes("燒燴大菜")) {
+  if (normalizedRole.includes("燒燴大菜")) {
     return "Main_Braised";
   }
 
-  if (role.includes("海鮮大菜")) {
+  if (normalizedRole.includes("海鮮大菜")) {
     return "Main_Seafood";
   }
 
-  if (role.includes("中場過場湯")) {
+  if (normalizedRole.includes("承啟中湯")) {
     return "Soup_Interlude";
   }
 
-  if (role.includes("季節時蔬")) {
+  if (normalizedRole.includes("季節時蔬")) {
     return "Vegetable_Seasonal";
   }
 
-  if (role.includes("主食飯麵")) {
+  if (normalizedRole.includes("主食飯麵")) {
     return "Staple_Rice_Noodles";
   }
 
-  if (role.includes("壓軸燉湯")) {
+  if (normalizedRole.includes("壓軸大湯")) {
     return "Soup_Final";
   }
 
-  if (role.includes("中式甜品")) {
+  if (normalizedRole.includes("晏尾甜品")) {
     return "Dessert_Chinese";
   }
 
@@ -293,21 +296,28 @@ export const buildLibraryReviewPrompt = (library: RoleDishLibrary) => {
     .join("\n");
 
   return [
-    "請你以中式宴席顧問、菜系研究者、宴客結構規劃師與提示詞優化顧問的角度，覆核以下同地位候選菜庫：",
+    "請你以中式宴席資料庫架構師、中式宴席顧問、菜系研究者與高預製備餐規劃師的角度，覆核以下同地位候選菜庫：",
     "目前系統使用的分類 Schema 對照如下：",
     schemaLines,
+    "以下為目前候選菜庫：",
     libraryLines,
+    "[Context]",
+    "- 料理體系：純中式料理（八大菜系、台菜、客家菜、淮揚菜，以及必要時可使用『大眾中式』『中式點心』作為泛中式標籤）。嚴禁出現西式、日式、韓式、南洋等異國料理。",
+    "- 食用人數與設備限制：預設為 10 人份桌菜，高度依賴冷凍/冷藏預製包，終端覆熱設備僅限基本瓦斯爐、電鍋、微波爐。",
+    "- 本次輸入的是候選菜庫，不是最終已選菜單。你只能評估候選多樣性、備選價值、潛在同質化與高預製適配性，不可直接把同分類候選的相似性判定為最終上桌已撞車。",
+    "請執行以下四項強制掃描並輸出報告：",
+    "A. 食材多樣性防撞車掃描（Diversity Scan）：檢查同一分類與跨分類的候選菜，是否存在主食材重疊、味型重複或烹法過度集中；若有，請標記『備選同質性過高』或『備選差異不足』，並建議補入異質候選。",
+    "B. 標準化建檔 Schema 掃描（Schema Standardization）：檢查宴席地位、菜名、菜系是否符合專業食譜與商業菜單標準；菜系必須是具體中式派系，若確實難以精準歸入單一菜系，可使用『大眾中式』，禁止使用『融合菜』『創意菜』『私房菜』。",
+    "C. 重複菜色掃描（Duplicate Scan）：嚴格比對所有分類，確保同一道菜不會重複出現在兩個不同的宴席地位中。",
+    "D. 高度預製適配性剔除規則（Prep-Suitability Rule）：根據 Context 的設備與預製限制，主動標記並建議剔除依賴高溫油炸求酥脆、覆熱後易出水或油水分離、以及精細火候要求過高的菜品。",
     "請用繁體中文輸出，並嚴格依照以下格式回覆：",
-    "0. 前提限制：這份八菜一湯只接受中式料理體系。請主動排除西式、日式、韓式、南洋與其他非中式候選；若菜色明顯不屬中式料理，即使可預製，也應列為不建議保留或建議剔除。",
-    "0.1 請分清楚『候選菜庫覆核』與『最終菜單覆核』：本次輸入的是候選菜庫，不是最終已選菜單。你在這一輪只能評估候選的多樣性、備選價值、潛在同質化與高預製適配性，不可直接把同分類候選的相似性判定為最終上桌菜單已撞車；只有在使用者提供最終已選的八菜一湯時，才可判定實際的食材撞車、味型撞車與宴席節奏衝突。",
-    "1. 先給這份菜庫整體評分（滿分 10 分，可含小數），並說明評分理由，至少涵蓋：宴席地位適配度、菜系合理性、預製度合理性、菜名標準性、候選完整性。",
-    "2. 評估這份『給 LLM 的覆核提示詞』本身寫得好不好，給一個滿分 10 分的分數，並提出可讓 IDE 之後生成更高品質覆核提示詞的改善建議。這一段只討論提示詞設計本身，不要混入菜庫資料修改建議。請特別檢查它是否明確要求：食材多樣性防撞車、重複菜色掃描、標準化欄位命名、以及 Context 情境輸入。",
-    "3. 逐一檢查每個宴席地位是否放對類型的菜、菜系標示是否合理、預製度描述是否恰當；若有不適合該地位、菜系歸類可疑、命名不精確、或不利於宴席節奏的項目，請逐條指出。你必須額外執行『食材多樣性掃描』『重複菜色／近似菜色掃描』與『高度預製適配性掃描』，檢查同一分類或跨分類是否出現主食材、烹法、味型過度相似的候選，避免全豬肉、全白菜、全糯米，以及同類型糖醋魚、排骨、雞湯重複堆疊；同時要主動標記那些不適合冷凍、解凍、覆熱、回蒸、回炸、微波的菜色，必要時建議直接剔除。若目前只是候選菜庫，請使用『候選同質性過高』『備選差異不足』『建議補入異質候選』等表述，避免直接寫成『撞車已發生』『不適合同時上桌』。你現在不是在模擬最終抽選結果，因此不要使用『若隨機抽選』『極易撞車』『可能同時上桌衝突』這類句型。",
-    "4. 針對每個宴席地位，提出菜色調整、修改或補充建議；若候選不足，請主動擴增菜品庫，補出更多適合同位階的候選菜。目標是把菜庫補強、補深、補廣，不是維持目前的候選數量；若有必要，可以明確建議某些地位增加到超過現有數量。補充建議時，請優先補進與現有食材屬性不同、且適合高度預製的候選。",
-    "5. 對所有你認為命名不夠標準、不夠精確、過於口語、或不符合常見食譜書／料理資料庫寫法的名稱提出修正建議。這裡不只包含菜名，也包含像『左先鋒』『主帥』『靈魂洗滌』這類宴席位階／分類名稱；若你認為它們可以改成更接近食譜書、正式菜單分類、料理資料庫欄位的標準名稱，也可以提出對照建議。對菜系名稱也請一併審核，優先使用可見於食譜書或料理資料庫的標準分類；避免使用『融合菜』『創意菜』『私房菜』這類模糊標籤，也避免使用會讓八菜一湯偏離中式料理範圍的非中式分類。若無法精準歸類，請標記『待人工確認』並說明原因。不要為了更好聽而任意升級食材、改變料理層級、或加入原本不存在的食材與修辭。",
-    "6. 請先彙整前面所有與『菜庫內容本身』有關的修改事項，另外整理成一段『可直接複製貼給 IDE 的菜庫修改提示詞』。這一段的目的，是讓 IDE 直接依據你的覆核結果去修改與擴增候選菜庫資料；必須明確列出要刪除、替換、改名、補充、增列的宴席地位、菜名、菜系、預製度與原因，並明確提醒 IDE 不需要拘泥於目前每個地位的候選數量。若涉及菜名或位階名稱修正，請以食譜書標準命名、正式菜單分類、資料庫欄位命名為優先，不要改寫成更華麗但偏離原本功能的名稱，也不要混入提示詞設計建議。",
-    "7. 再另外整理一段『可直接複製貼給 IDE 的提示詞優化提示詞』，這一段主要用來優化未來給 LLM 的菜庫覆核提示詞；除了提示詞本身的結構與措辭，也可以納入系統設計面、資訊架構、欄位設計、輸入輸出格式、操作流程等會影響覆核品質的改善建議，但不要混入具體菜庫資料修改內容。這一段請強制使用「系統設計改善清單」格式輸出，至少包含：問題、影響、改善方向、建議做法、若要交給 IDE 執行時的提示詞草案，並把以下四項整併進新版 Prompt：A. 食材多樣性掃描；B. 標準化建檔 Schema；C. [Context] 區塊（至少含食用人數與設備限制）；D. 高度預製適配性剔除規則。",
-    "8. 若某個宴席地位沒有問題，也要明確寫出『可保留』與原因，避免只挑錯不挑對。",
+    "1. 【整體總評】：給整體評分（滿分 10 分，可含小數），並結合 Context 說明菜庫健康度、宴席地位適配度、菜系合理性與候選完整性。",
+    "2. 【違規剔除名單】：列出違反純中式、重複菜色、或無法高度預製的項目與原因。你現在不是在模擬最終抽選結果，因此不要使用『若隨機抽選』『極易撞車』『可能同時上桌衝突』這類句型。",
+    "3. 【同質性警告】：列出食材、味型、烹法過度集中的項目，請使用『候選同質性過高』『備選差異不足』『建議補入異質候選』等表述，不要直接寫成『撞車已發生』。",
+    "4. 【標準化修正】：列出需要改名的菜色、分類或菜系名稱，並說明理由。命名以食譜書、商業菜單、料理資料庫寫法為優先，不要為了更好聽而任意升級食材或加入原本不存在的修辭。",
+    "5. 【擴增建議】：推薦補充的高適配性預製中式菜色，目標是把菜庫補強、補深、補廣，不需要拘泥於目前每個地位的候選數量。",
+    "6. 【可直接複製貼給 IDE 的菜庫修改提示詞】：彙整所有與菜庫內容本身有關的刪除、替換、改名、補充、增列事項，必須明確列出宴席地位、菜名、菜系、預製度與原因，並提醒 IDE 不需要拘泥於目前每個分類的候選數量。",
+    "7. 【可直接複製貼給 IDE 的提示詞優化提示詞】：根據本次問題，整理成一份可交給 IDE 的 Review Prompt 升級指令，必須整併 Context、4D 掃描法、候選菜庫與最終菜單分流規則，以及清晰的輸出格式，但不要混入具體菜庫資料修改內容。",
   ].join("\n");
 };
 
@@ -325,36 +335,38 @@ export const buildLibraryExportJson = (library: RoleDishLibrary) =>
   );
 
 export const getGuestCourseLabel = (role: string) => {
-  if (role.includes("迎賓冷盤")) {
+  const normalizedRole = normalizeRoleName(role);
+
+  if (normalizedRole.includes("迎賓冷盤")) {
     return "迎賓冷盤";
   }
 
-  if (role.includes("燒燴大菜")) {
+  if (normalizedRole.includes("燒燴大菜")) {
     return "燒燴大菜";
   }
 
-  if (role.includes("海鮮大菜")) {
+  if (normalizedRole.includes("海鮮大菜")) {
     return "海鮮大菜";
   }
 
-  if (role.includes("中場過場湯")) {
-    return "中場過場湯";
+  if (normalizedRole.includes("承啟中湯")) {
+    return "承啟中湯";
   }
 
-  if (role.includes("季節時蔬")) {
+  if (normalizedRole.includes("季節時蔬")) {
     return "季節時蔬";
   }
 
-  if (role.includes("主食飯麵")) {
+  if (normalizedRole.includes("主食飯麵")) {
     return "主食飯麵";
   }
 
-  if (role.includes("壓軸燉湯")) {
-    return "壓軸燉湯";
+  if (normalizedRole.includes("壓軸大湯")) {
+    return "壓軸大湯";
   }
 
-  if (role.includes("中式甜品")) {
-    return "中式甜品";
+  if (normalizedRole.includes("晏尾甜品")) {
+    return "晏尾甜品";
   }
 
   return "私宴精選";
@@ -532,7 +544,7 @@ export const getMatchingLibraryOption = (
 ) =>
   options.find(
     (option) =>
-      option.role === dish.role &&
+      normalizeRoleName(option.role) === normalizeRoleName(dish.role) &&
       option.dishName === dish.dishName &&
       option.cuisine === dish.cuisine &&
       option.premadeLevel === dish.premadeLevel &&
@@ -590,12 +602,13 @@ export const sanitizeStoredDishes = (
   return fallback.map((dish) => {
     const storedDish = storedMap.get(dish.id);
 
-    if (!storedDish || storedDish.role !== dish.role) {
+    if (!storedDish || normalizeRoleName(storedDish.role) !== normalizeRoleName(dish.role)) {
       return dish;
     }
 
     return {
       ...storedDish,
+      role: dish.role,
       thawProfile: isThawProfileKey(storedDish.thawProfile)
         ? storedDish.thawProfile
         : dish.thawProfile,
@@ -616,7 +629,9 @@ export const sanitizeRoleDishLibrary = (
 
   return Object.fromEntries(
     Object.entries(fallback).map(([role, fallbackOptions]) => {
-      const candidate = (value as Record<string, unknown>)[role];
+      const candidate = getEquivalentRoleNames(role)
+        .map((candidateRole) => (value as Record<string, unknown>)[candidateRole])
+        .find(Array.isArray);
 
       if (!Array.isArray(candidate)) {
         return [role, fallbackOptions];
@@ -633,7 +648,7 @@ export const sanitizeRoleDishLibrary = (
           item !== null &&
           typeof item.libraryId === "string" &&
           typeof item.role === "string" &&
-          item.role === role &&
+          normalizeRoleName(item.role) === normalizeRoleName(role) &&
           typeof item.dishName === "string" &&
           typeof item.cuisine === "string" &&
           typeof item.premadeLevel === "string",
@@ -644,6 +659,7 @@ export const sanitizeRoleDishLibrary = (
         validOptions.length
           ? validOptions.map((option, index) => ({
               ...option,
+              role,
               thawProfile: isThawProfileKey(option.thawProfile)
                 ? option.thawProfile
                 : fallbackOptions[index]?.thawProfile ?? "other",
