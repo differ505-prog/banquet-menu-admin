@@ -247,6 +247,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("高度預製適配性掃描");
     expect(prompt).toContain("候選同質性過高");
     expect(prompt).toContain("備選差異不足");
+    expect(prompt).toContain("你現在不是在模擬最終抽選結果");
+    expect(prompt).toContain("不要使用『若隨機抽選』『極易撞車』");
     expect(prompt).toContain("標準化建檔 Schema");
     expect(prompt).toContain("[Context] 區塊");
     expect(prompt).toContain("食譜書／料理資料庫寫法");
