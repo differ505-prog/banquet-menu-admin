@@ -103,6 +103,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("資深中式宴席資料庫架構師");
     expect(prompt).toContain("[Context & Constraints]");
     expect(prompt).toContain("本次輸入的是最終已選菜單（Final Menu）");
+    expect(prompt).toContain("可見於食譜書與商業菜單資料庫");
+    expect(prompt).toContain("本幫菜");
     expect(prompt).toContain("【海鮮大菜】主菜｜Schema:Main_Seafood｜破布子蒸午仔魚");
     expect(exportJson).toContain("\"title\": \"高預製度宴客菜單\"");
     expect(exportJson).toContain("\"roleSchema\"");
@@ -245,12 +247,18 @@ describe("menu utilities", () => {
     expect(prompt).toContain("[Context & Constraints]");
     expect(prompt).toContain("絕對純中式");
     expect(prompt).toContain("大眾中式");
+    expect(prompt).toContain("可見於食譜書與商業菜單資料庫");
+    expect(prompt).toContain("包含但不限於八大菜系");
+    expect(prompt).toContain("本幫菜");
     expect(prompt).toContain("候選菜庫（Pool）");
     expect(prompt).toContain("只有在『同一道菜重複出現在不同分類』");
     expect(prompt).toContain("[Evaluation Process (4D Scan)]");
     expect(prompt).toContain("[Output Format]");
     expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
     expect(prompt).toContain("可直接複製貼給 IDE 的提示詞優化提示詞");
+    expect(prompt).toContain("可直接複製貼給 IDE 的架構設計提示詞");
+    expect(prompt).toContain("不要輸出完整版 Prompt");
+    expect(prompt).toContain("應修改的段落、原問題、建議寫法與預期效果");
     expect(prompt).toContain("不必拘泥於原先每個分類的候選數量");
     expect(prompt).toContain("Diversity Scan（多樣性掃描）");
     expect(prompt).toContain("Duplicate Scan（重複掃描）");
@@ -266,8 +274,10 @@ describe("menu utilities", () => {
     expect(prompt).toContain("嚴禁西式、日式、南洋等異國元素");
     expect(prompt).toContain("嚴禁需要烤箱、氣炸鍋");
     expect(prompt).toContain("綠色葉菜類");
+    expect(prompt).toContain("菜系標註原則");
     expect(prompt).toContain("不要混入具體菜庫資料修改內容");
     expect(prompt).toContain("不可直接翻成刪菜指令");
+    expect(prompt).toContain("不要混入具體菜色增刪名單");
     expect(prompt).toContain("蒜蓉粿條蒸雪蟹腳");
     expect(prompt).toContain("栗子燒黃燜雞");
     expect(prompt).toContain("百合銀耳燉雪蛤");
