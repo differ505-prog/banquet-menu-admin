@@ -8,7 +8,7 @@ export type CookingProfileKey =
   | "reheat-rice"
   | "reheat-veg";
 
-export type CookingGuideKey = "steam" | "fry";
+export type CookingGuideKey = "steam" | "fry" | "air-fryer";
 
 export type ReheatMethod = "GAS_STOVE" | "RICE_COOKER" | "MICROWAVE";
 

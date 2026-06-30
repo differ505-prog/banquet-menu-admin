@@ -463,8 +463,16 @@ describe("menu utilities", () => {
     const cookingSummary = buildCookingSummary(defaultMenu);
 
     expect(cookingGuideText).toContain("油炸火候表");
+    expect(cookingGuideText).toContain("氣炸烤箱免解凍速查表");
     expect(cookingGuideText).toContain("清蒸火候表");
     expect(cookingGuideText).toContain("全魚 600g 至 800g");
+    expect(cookingGuideText).toContain("冷凍香腸");
+    expect(cookingGuideText).toContain("180°C");
+    expect(cookingGuideText).toContain("12 至 15 分鐘");
+    expect(cookingGuideText).toContain("冷凍甜不辣");
+    expect(cookingGuideText).toContain("190°C");
+    expect(cookingGuideText).toContain("冷凍魚丸 / 花枝丸");
+    expect(cookingGuideText).toContain("冷凍米血糕 / 黑輪片");
     expect(cookingReminderText).toContain("【海鮮大菜】主菜｜破布子蒸午仔魚");
     expect(cookingReminderText).toContain("類型：魚類清蒸");
     expect(cookingSummary).toContain("清蒸");
