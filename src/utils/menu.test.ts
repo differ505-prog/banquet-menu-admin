@@ -236,6 +236,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("不需要拘泥於目前每個地位的候選數量");
     expect(prompt).toContain("系統設計面、資訊架構、欄位設計");
     expect(prompt).toContain("食譜書／料理資料庫寫法");
+    expect(prompt).toContain("宴席位階／分類名稱");
+    expect(prompt).toContain("正式菜單分類、料理資料庫欄位");
     expect(prompt).toContain("不要為了更好聽而任意升級食材");
     expect(prompt).toContain("系統設計改善清單");
     expect(prompt).toContain("問題、影響、改善方向、建議做法");
