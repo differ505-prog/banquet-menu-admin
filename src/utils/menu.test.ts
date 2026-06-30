@@ -230,7 +230,9 @@ describe("menu utilities", () => {
     expect(prompt).toContain("【主帥】壓軸定海神針");
     expect(prompt).toContain("整體評分（滿分 10 分");
     expect(prompt).toContain("給 LLM 的覆核提示詞");
-    expect(prompt).toContain("可直接複製貼給 IDE 的最終提示詞");
+    expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
+    expect(prompt).toContain("可直接複製貼給 IDE 的提示詞優化提示詞");
+    expect(prompt).toContain("不要混入菜庫資料修改內容");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"library\"");
   });

@@ -113,7 +113,7 @@ export function LibraryManager({
           菜庫覆核用途
         </p>
         <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-          點 `複製菜庫覆核指令` 可直接貼給 LLM，請它評分菜庫品質、指出提示詞可改善處、校正正式菜名，並補出更適合同位階的候選菜與可直接貼回 IDE 的最終提示詞。
+          點 `複製菜庫覆核指令` 可直接貼給 LLM，請它把「菜庫內容修改建議」與「未來覆核提示詞優化建議」分開輸出，最後各自整理成可直接貼回 IDE 的兩段提示詞。
         </p>
       </div>
 
