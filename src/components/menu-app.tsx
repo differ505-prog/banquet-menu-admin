@@ -26,9 +26,11 @@ import {
   buildLibraryExportJson,
   buildLibraryReviewPrompt,
   buildMenuSummary,
+  buildStorageVersion,
   buildThawGuideText,
   buildThawReminderText,
   buildThawSummary,
+  ensureStorageVersion,
   filterDishes,
   getChangedDishCount,
   getCookingGuides,
@@ -46,6 +48,9 @@ import {
   updateRoleDishOption,
 } from "@/utils/menu";
 
+const createDefaultLibraryState = () => cloneRoleDishLibrary();
+const CURRENT_STORAGE_VERSION = buildStorageVersion(defaultMenu, createDefaultLibraryState());
+
 export function MenuApp() {
   const [state, dispatch] = useReducer(menuReducer, defaultMenu, initialMenuState);
   const [cuisineFilter, setCuisineFilter] = useState("");
@@ -57,13 +62,14 @@ export function MenuApp() {
   const [isGuestPreviewOpen, setIsGuestPreviewOpen] = useState(false);
   const [isThawGuideOpen, setIsThawGuideOpen] = useState(false);
   const [libraryState, setLibraryState] = useState(() => {
-    const fallback = cloneRoleDishLibrary();
+    const fallback = createDefaultLibraryState();
 
     if (typeof window === "undefined") {
       return fallback;
     }
 
     try {
+      ensureStorageVersion(window.localStorage, CURRENT_STORAGE_VERSION);
       const libraryRaw = window.localStorage.getItem(LIBRARY_STORAGE_KEY);
 
       return libraryRaw ? sanitizeRoleDishLibrary(JSON.parse(libraryRaw), fallback) : fallback;
@@ -78,6 +84,7 @@ export function MenuApp() {
 
   useEffect(() => {
     try {
+      ensureStorageVersion(window.localStorage, CURRENT_STORAGE_VERSION);
       const raw = window.localStorage.getItem(MENU_STORAGE_KEY);
 
       if (raw) {
@@ -275,7 +282,7 @@ export function MenuApp() {
               </p>
             </div>
             <p className="mt-4 rounded-2xl border border-[color:var(--accent)]/20 bg-[color:var(--accent)]/10 px-4 py-3 text-xs leading-6 text-[color:var(--foreground)]">
-              已啟用本機自動保存，重新開啟頁面時會優先還原上次調整過的宴客草稿。
+              已啟用本機自動保存；若系統偵測到預設菜單或候選菜庫版本更新，會自動清除舊快取並套用新版資料。
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button

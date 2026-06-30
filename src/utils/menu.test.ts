@@ -17,9 +17,11 @@ import {
   buildLibraryExportJson,
   buildLibraryReviewPrompt,
   buildMenuSummary,
+  buildStorageVersion,
   buildThawGuideText,
   buildThawReminderText,
   buildThawSummary,
+  ensureStorageVersion,
   filterDishes,
   getChangedDishCount,
   getMatchingLibraryOption,
@@ -27,10 +29,13 @@ import {
   getPremadeReadyCount,
   getGuestCourseLabel,
   initialMenuState,
+  LIBRARY_STORAGE_KEY,
+  MENU_STORAGE_KEY,
   menuReducer,
   removeRoleDishOption,
   sanitizeRoleDishLibrary,
   sanitizeStoredDishes,
+  STORAGE_VERSION_KEY,
   updateRoleDishOption,
 } from "./menu";
 
@@ -283,6 +288,48 @@ describe("menu utilities", () => {
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"library\"");
+  });
+
+  it("invalidates persisted workspace when default data version changes", () => {
+    const createStorageMock = (initialValues: Record<string, string>) => {
+      const store = new Map(Object.entries(initialValues));
+
+      return {
+        getItem: (key: string) => store.get(key) ?? null,
+        setItem: (key: string, value: string) => {
+          store.set(key, value);
+        },
+        removeItem: (key: string) => {
+          store.delete(key);
+        },
+      };
+    };
+    const currentLibrary = cloneRoleDishLibrary();
+    const currentVersion = buildStorageVersion(defaultMenu, currentLibrary);
+    const updatedLibrary = cloneRoleDishLibrary();
+
+    updatedLibrary["【燒燴大菜】主菜"] = [
+      ...updatedLibrary["【燒燴大菜】主菜"],
+      {
+        ...updatedLibrary["【燒燴大菜】主菜"][0],
+        libraryId: "version-check-option",
+        dishName: "版本測試菜",
+      },
+    ];
+
+    const nextVersion = buildStorageVersion(defaultMenu, updatedLibrary);
+    const storage = createStorageMock({
+      [MENU_STORAGE_KEY]: JSON.stringify(defaultMenu),
+      [LIBRARY_STORAGE_KEY]: JSON.stringify(currentLibrary),
+      [STORAGE_VERSION_KEY]: currentVersion,
+    });
+
+    expect(nextVersion).not.toBe(currentVersion);
+    expect(ensureStorageVersion(storage, nextVersion)).toBe(true);
+    expect(storage.getItem(MENU_STORAGE_KEY)).toBeNull();
+    expect(storage.getItem(LIBRARY_STORAGE_KEY)).toBeNull();
+    expect(storage.getItem(STORAGE_VERSION_KEY)).toBe(nextVersion);
+    expect(ensureStorageVersion(storage, nextVersion)).toBe(false);
   });
 
   it("maps banquet roles to guest-facing course labels", () => {

@@ -547,6 +547,47 @@ export function buildCookingSummary(dishes: MenuDish[]) {
 
 export const MENU_STORAGE_KEY = "banquet-menu-admin:dishes";
 export const LIBRARY_STORAGE_KEY = "banquet-menu-admin:role-library";
+export const STORAGE_VERSION_KEY = "banquet-menu-admin:storage-version";
+
+const STORAGE_VERSION_SEED = "banquet-menu-admin:v2";
+
+const hashStorageSnapshot = (value: string) => {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+
+  return hash.toString(36);
+};
+
+export const buildStorageVersion = (
+  dishes: MenuDish[],
+  library: RoleDishLibrary,
+) =>
+  `${STORAGE_VERSION_SEED}:${hashStorageSnapshot(
+    JSON.stringify({
+      dishes,
+      library,
+    }),
+  )}`;
+
+export const ensureStorageVersion = (
+  storage: Pick<Storage, "getItem" | "setItem" | "removeItem">,
+  currentVersion: string,
+) => {
+  const storedVersion = storage.getItem(STORAGE_VERSION_KEY);
+
+  if (storedVersion === currentVersion) {
+    return false;
+  }
+
+  storage.removeItem(MENU_STORAGE_KEY);
+  storage.removeItem(LIBRARY_STORAGE_KEY);
+  storage.setItem(STORAGE_VERSION_KEY, currentVersion);
+
+  return true;
+};
 
 export const getMatchingLibraryOption = (
   dish: MenuDish,
