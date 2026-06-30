@@ -284,10 +284,20 @@ describe("menu utilities", () => {
     expect(exportJson).toContain("老鴨扁尖筍濃湯");
     expect(exportJson).toContain("台式紅燒羊腩煲");
     expect(exportJson).toContain("蟹黃燴芙蓉豆腐");
+    expect(exportJson).toContain("鮑汁燴花膠海參");
+    expect(exportJson).toContain("黑椒牛柳杏鮑菇");
+    expect(exportJson).toContain("扁尖筍百葉燒毛豆");
+    expect(exportJson).toContain("上海蔥油拌麵");
+    expect(exportJson).toContain("\"老醋陳皮拌雲耳\"");
+    expect(exportJson).toContain("\"cuisine\": \"江浙菜\"");
     expect(exportJson).toContain("粵菜");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"roleSchema\"");
     expect(exportJson).toContain("\"library\"");
+    expect(exportJson).not.toContain("左宗棠雞");
+    expect(exportJson).not.toContain("藤椒酸菜煮魚片");
+    expect(exportJson).not.toContain("干貝高湯燴刈菜");
+    expect(exportJson).not.toContain("家鄉干貝炒伊麵");
   });
 
   it("invalidates persisted workspace when default data version changes", () => {
