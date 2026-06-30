@@ -10,6 +10,19 @@ export type CookingProfileKey =
 
 export type CookingGuideKey = "steam" | "fry";
 
+export type ReheatMethod = "GAS_STOVE" | "RICE_COOKER" | "MICROWAVE";
+
+export type DishMetadata = {
+  prepSuitabilityScore?: number;
+  reheatMethods?: ReheatMethod[];
+  primaryIngredient?: string;
+  flavorProfile?: string;
+  isLeafyGreen?: boolean;
+  isFried?: boolean;
+  freezeStableLeafyGreen?: boolean;
+  requiresCrispyTexture?: boolean;
+};
+
 export type CopyTarget =
   | "prompt"
   | "json"
@@ -21,7 +34,7 @@ export type CopyTarget =
   | "cookingGuide"
   | "cookingReminder";
 
-export type MenuDish = {
+export type MenuDish = DishMetadata & {
   id: string;
   role: string;
   dishName: string;
@@ -31,7 +44,7 @@ export type MenuDish = {
   cookingProfile: CookingProfileKey;
 };
 
-export type RoleDishOption = {
+export type RoleDishOption = DishMetadata & {
   libraryId: string;
   role: string;
   dishName: string;

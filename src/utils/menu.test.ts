@@ -4,6 +4,7 @@ import { defaultMenu } from "../data/default-menu";
 import {
   cloneRoleDishLibrary,
   createEmptyRoleDishOption,
+  getPoolValidationIssues,
   getRoleDishOptions,
 } from "../data/role-dish-library";
 import {
@@ -230,7 +231,41 @@ describe("menu utilities", () => {
     expect(updated[role]?.find((option) => option.libraryId === created.libraryId)?.dishName).toBe(
       "桂花酒釀湯圓",
     );
+    expect(updated[role]?.find((option) => option.libraryId === created.libraryId)?.primaryIngredient).toBe(
+      "dessert",
+    );
     expect(removed[role]?.some((option) => option.libraryId === created.libraryId)).toBe(false);
+  });
+
+  it("hydrates pool metadata and blocks invalid pool dishes through interceptors", () => {
+    const fishOption = getRoleDishOptions("【海鮮大菜】主菜").find(
+      (option) => option.dishName === "豉汁蒸石斑魚",
+    );
+
+    expect(fishOption?.reheatMethods).toEqual(["RICE_COOKER"]);
+    expect(fishOption?.primaryIngredient).toBe("fish");
+    expect(fishOption?.flavorProfile).toBe("soy_braised");
+    expect(fishOption?.prepSuitabilityScore).toBeGreaterThanOrEqual(3);
+
+    expect(
+      getPoolValidationIssues({
+        ...createEmptyRoleDishOption("【燴扒蔬蕈】蔬菜"),
+        dishName: "酥炸芥蘭",
+        cuisine: "粵菜",
+        premadeLevel: "氣炸鍋加熱",
+        isLeafyGreen: true,
+        isFried: true,
+        requiresCrispyTexture: true,
+        reheatMethods: ["MICROWAVE"],
+        prepSuitabilityScore: 2,
+      }),
+    ).toEqual(
+      expect.arrayContaining([
+        "prep_suitability_score_below_threshold",
+        "leafy_green_interceptor",
+        "fried_texture_interceptor",
+      ]),
+    );
   });
 
   it("builds library review prompt and export json", () => {
@@ -264,12 +299,15 @@ describe("menu utilities", () => {
     expect(prompt).toContain("不必拘泥於原先每個分類的候選數量");
     expect(prompt).toContain("Diversity Scan（多樣性掃描）");
     expect(prompt).toContain("Duplicate Scan（重複掃描）");
-    expect(prompt).toContain("先檢查『完全相同菜名』是否跨分類重複");
+    expect(prompt).toContain("硬性重複（Hard Duplicate）");
     expect(prompt).toContain("Prep-Suitability Rule（高預製適配性掃描）");
     expect(prompt).toContain("候選同質性過高");
     expect(prompt).toContain("備選差異不足");
     expect(prompt).toContain("若目前是候選菜庫");
     expect(prompt).toContain("【強制狀態聲明】");
+    expect(prompt).toContain("請於每一次對話初始");
+    expect(prompt).toContain("『候選』『Pool』");
+    expect(prompt).toContain("『請幫我配一桌』『最終菜單』");
     expect(prompt).toContain("備選池同質性風險");
     expect(prompt).toContain("同桌上菜將發生撞車");
     expect(prompt).toContain("同質性本身不得作為刪除理由");
@@ -280,7 +318,10 @@ describe("menu utilities", () => {
     expect(prompt).toContain("綠色葉菜類");
     expect(prompt).toContain("菜系標註原則");
     expect(prompt).toContain("核心食材 + 烹調法 + 味型");
-    expect(prompt).toContain("實質撞菜風險，建議強制替換其一");
+    expect(prompt).toContain("硬性重複（Hard Duplicate）");
+    expect(prompt).toContain("軟性重複（Soft Duplicate）");
+    expect(prompt).toContain("Yellow Warning：備選差異不足");
+    expect(prompt).toContain("Red Error：撞菜風險，強制替換");
     expect(prompt).toContain("不要混入具體菜庫資料修改內容");
     expect(prompt).toContain("不可直接翻成刪菜指令");
     expect(prompt).toContain("不要混入具體菜色增刪名單");
@@ -289,9 +330,14 @@ describe("menu utilities", () => {
     expect(prompt).toContain("primary_ingredient");
     expect(prompt).toContain("flavor_profile");
     expect(prompt).toContain("Pool Builder 的多樣性雷達圖");
-    expect(prompt).toContain("Final Menu Generator 的互斥規則引擎");
+    expect(prompt).toContain("Final Menu Generator 基於 Graph 或 CSP 的互斥規則引擎");
+    expect(prompt).toContain("LeafyGreenInterceptor");
+    expect(prompt).toContain("FriedTextureInterceptor");
+    expect(prompt).toContain("Graph 或 CSP");
     expect(prompt).toContain("is_leafy_green");
     expect(prompt).toContain("is_fried");
+    expect(prompt).toContain("奶黃壽桃包");
+    expect(prompt).toContain("豉汁蒸石斑魚");
     expect(prompt).toContain("栗子燒黃燜雞");
     expect(prompt).toContain("百合銀耳燉雪蛤");
     expect(prompt).toContain("鎮江排骨");
@@ -309,16 +355,18 @@ describe("menu utilities", () => {
     expect(exportJson).toContain("老鴨扁尖筍濃湯");
     expect(exportJson).toContain("台式紅燒羊腩煲");
     expect(exportJson).toContain("蟹黃燴芙蓉豆腐");
+    expect(exportJson).toContain("蟹黃海鮮豆腐煲");
     expect(exportJson).toContain("鮑汁燴花膠海參");
     expect(exportJson).toContain("樹子冬瓜蒸海鱸魚");
-    expect(exportJson).toContain("黑椒牛柳杏鮑菇");
+    expect(exportJson).toContain("紅燒牛臉頰肉");
     expect(exportJson).toContain("蟲草花金針蒸滑雞");
     expect(exportJson).toContain("扁尖筍百葉燒毛豆");
     expect(exportJson).toContain("白果烤麩");
     expect(exportJson).toContain("麻油猴頭菇");
     expect(exportJson).toContain("上海蔥油拌麵");
+    expect(exportJson).toContain("上海菜飯");
     expect(exportJson).toContain("XO醬海鮮炒飯");
-    expect(exportJson).toContain("台式家常炒麵");
+    expect(exportJson).toContain("奶黃壽桃包");
     expect(exportJson).toContain("五味中卷");
     expect(exportJson).toContain("紅油拌腐竹");
     expect(exportJson).toContain("\"老醋陳皮拌雲耳\"");
@@ -333,6 +381,9 @@ describe("menu utilities", () => {
     expect(exportJson).not.toContain("干貝高湯燴刈菜");
     expect(exportJson).not.toContain("家鄉干貝炒伊麵");
     expect(exportJson).not.toContain("蒜蓉粿條蒸雪蟹腳");
+    expect(exportJson).not.toContain("黑椒牛柳杏鮑菇");
+    expect(exportJson).not.toContain("台式家常炒麵");
+    expect(exportJson).not.toContain("豆豉清蒸石斑魚");
   });
 
   it("invalidates persisted workspace when default data version changes", () => {
