@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { Check, Clipboard, CookingPot, Snowflake, X } from "lucide-react";
 
 import type { CookingGuide, CopyTarget, ThawGuide } from "@/types/menu";
+import { buildCookingGuideSectionText } from "@/utils/menu";
 
 type ThawGuideModalProps = {
   guides: ThawGuide[];
@@ -30,6 +32,24 @@ export function ThawGuideModal({
   cookingGuideText,
   cookingSummary,
 }: ThawGuideModalProps) {
+  const preferredCookingGuideKey =
+    cookingGuides.find((guide) => guide.key === "air-fryer")?.key ?? cookingGuides[0]?.key ?? "fry";
+  const [activeCookingGuideKey, setActiveCookingGuideKey] =
+    useState<CookingGuide["key"]>(preferredCookingGuideKey);
+  const activeCookingGuide =
+    cookingGuides.find((guide) => guide.key === activeCookingGuideKey) ?? cookingGuides[0] ?? null;
+  const activeCookingGuideText = useMemo(
+    () =>
+      activeCookingGuide ? buildCookingGuideSectionText(activeCookingGuide.key) : cookingGuideText,
+    [activeCookingGuide, cookingGuideText],
+  );
+
+  useEffect(() => {
+    if (!cookingGuides.some((guide) => guide.key === activeCookingGuideKey)) {
+      setActiveCookingGuideKey(preferredCookingGuideKey);
+    }
+  }, [activeCookingGuideKey, cookingGuides, preferredCookingGuideKey]);
+
   if (!open) {
     return null;
   }
@@ -43,10 +63,10 @@ export function ThawGuideModal({
               廚房戰情室秘笈
             </p>
             <h2 className="serif-title mt-3 text-3xl text-[color:var(--foreground)]">
-              退冰節奏與油炸、清蒸火候一次收齊
+              退冰節奏與烹調指南一次收齊
             </h2>
             <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
-              我把魚蝦肉退冰判斷、油炸火候表與清蒸時間集中成一份工作秘笈，方便你開席前快速排兵布陣。
+              我把魚蝦肉退冰判斷，以及油炸、清蒸、氣炸烤箱等烹調指南集中成一份工作秘笈，方便你開席前快速排兵布陣。
             </p>
           </div>
 
@@ -71,11 +91,19 @@ export function ThawGuideModal({
           </button>
           <button
             type="button"
-            onClick={() => onCopy(cookingGuideText, "cookingGuide")}
+            onClick={() => onCopy(activeCookingGuideText, "cookingGuide")}
             className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition"
           >
             <CopyBadge active={copiedTarget === "cookingGuide"} />
-            {copiedTarget === "cookingGuide" ? "已複製火候表" : "複製油炸/清蒸火候表"}
+            {copiedTarget === "cookingGuide" ? "已複製目前指南" : "複製目前指南"}
+          </button>
+          <button
+            type="button"
+            onClick={() => onCopy(cookingGuideText, "cookingGuide")}
+            className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition"
+          >
+            <CopyBadge active={false} />
+            複製完整烹調指南
           </button>
           <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent-cool)]/25 bg-[color:var(--accent-cool)]/10 px-4 py-2 text-xs text-[color:var(--foreground)]">
             <Snowflake className="h-4 w-4" />
@@ -147,48 +175,65 @@ export function ThawGuideModal({
 
           <div className="mt-8">
             <p className="text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
-              油炸與清蒸火候
+              烹調指南
             </p>
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              {cookingGuides.map((guide) => (
-                <article
-                  key={guide.key}
-                  className="rounded-[28px] border border-[color:var(--line)] bg-[radial-gradient(circle_at_top,rgba(170,151,126,0.12),transparent_26%),rgba(255,255,255,0.03)] p-5"
-                >
-                  <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
-                    <CookingPot className="h-4 w-4" />
+            <div className="mt-4 flex flex-wrap gap-2">
+              {cookingGuides.map((guide) => {
+                const active = guide.key === activeCookingGuideKey;
+
+                return (
+                  <button
+                    key={guide.key}
+                    type="button"
+                    onClick={() => setActiveCookingGuideKey(guide.key)}
+                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                      active
+                        ? "border-[color:var(--accent)] bg-[color:var(--accent)]/15 text-[color:var(--foreground)]"
+                        : "border-[color:var(--line)] bg-[color:var(--surface-soft)] text-[color:var(--muted)] hover:text-[color:var(--foreground)]"
+                    }`}
+                  >
                     {guide.label}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{guide.summary}</p>
-                  <div className="mt-4 space-y-3">
-                    {guide.entries.map((entry) => (
-                      <div
-                        key={`${guide.key}-${entry.label}`}
-                        className="rounded-[22px] border border-[color:var(--line)] bg-[color:var(--surface-soft)] p-4"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <h3 className="text-base font-semibold text-[color:var(--foreground)]">
-                            {entry.label}
-                          </h3>
-                          <span className="text-sm text-[color:var(--accent-strong)]">
-                            {entry.score}/10
-                          </span>
-                        </div>
-                        <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
-                          火候：{entry.temperature}
-                        </p>
-                        <p className="mt-1 text-sm leading-7 text-[color:var(--foreground)]">
-                          時間：{entry.duration}
-                        </p>
-                        <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-                          {entry.note}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-              ))}
+                  </button>
+                );
+              })}
             </div>
+            {activeCookingGuide ? (
+              <article className="mt-4 rounded-[28px] border border-[color:var(--line)] bg-[radial-gradient(circle_at_top,rgba(170,151,126,0.12),transparent_26%),rgba(255,255,255,0.03)] p-5">
+                <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
+                  <CookingPot className="h-4 w-4" />
+                  {activeCookingGuide.label}
+                </p>
+                <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                  {activeCookingGuide.summary}
+                </p>
+                <div className="mt-4 space-y-3">
+                  {activeCookingGuide.entries.map((entry) => (
+                    <div
+                      key={`${activeCookingGuide.key}-${entry.label}`}
+                      className="rounded-[22px] border border-[color:var(--line)] bg-[color:var(--surface-soft)] p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h3 className="text-base font-semibold text-[color:var(--foreground)]">
+                          {entry.label}
+                        </h3>
+                        <span className="text-sm text-[color:var(--accent-strong)]">
+                          {entry.score}/10
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
+                        火候：{entry.temperature}
+                      </p>
+                      <p className="mt-1 text-sm leading-7 text-[color:var(--foreground)]">
+                        時間：{entry.duration}
+                      </p>
+                      <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                        {entry.note}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ) : null}
           </div>
         </div>
       </div>

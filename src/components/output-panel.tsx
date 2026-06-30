@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { Check, Clipboard, CookingPot, FileJson2, FileSearch, Snowflake, Sparkles, X } from "lucide-react";
 
-import type { CopyTarget } from "@/types/menu";
+import type { CookingGuide, CopyTarget } from "@/types/menu";
+import { buildCookingGuideSectionText } from "@/utils/menu";
 
 type OutputPanelProps = {
   summary: string;
@@ -12,6 +14,7 @@ type OutputPanelProps = {
   thawGuideText: string;
   cookingReminderText: string;
   cookingGuideText: string;
+  cookingGuides: CookingGuide[];
   prompt: string;
   exportJson: string;
   copiedTarget: CopyTarget | null;
@@ -34,6 +37,7 @@ export function OutputPanel({
   thawGuideText,
   cookingReminderText,
   cookingGuideText,
+  cookingGuides,
   prompt,
   exportJson,
   copiedTarget,
@@ -41,6 +45,18 @@ export function OutputPanel({
   open,
   onClose,
 }: OutputPanelProps) {
+  const preferredCookingGuideKey =
+    cookingGuides.find((guide) => guide.key === "air-fryer")?.key ?? cookingGuides[0]?.key ?? "fry";
+  const [activeCookingGuideKey, setActiveCookingGuideKey] =
+    useState<CookingGuide["key"]>(preferredCookingGuideKey);
+  const activeCookingGuide =
+    cookingGuides.find((guide) => guide.key === activeCookingGuideKey) ?? cookingGuides[0] ?? null;
+  const activeCookingGuideText = useMemo(
+    () =>
+      activeCookingGuide ? buildCookingGuideSectionText(activeCookingGuide.key) : cookingGuideText,
+    [activeCookingGuide, cookingGuideText],
+  );
+
   if (!open) {
     return null;
   }
@@ -130,7 +146,7 @@ export function OutputPanel({
             <div className="flex flex-wrap items-center justify-between gap-4">
               <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
                 <CookingPot className="h-4 w-4" />
-                廚房烹調提醒
+                廚房烹調提醒與查閱
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -143,17 +159,87 @@ export function OutputPanel({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onCopy(cookingGuideText, "cookingGuide")}
+                  onClick={() => onCopy(activeCookingGuideText, "cookingGuide")}
                   className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition"
                 >
                   <CopyBadge active={copiedTarget === "cookingGuide"} />
-                  {copiedTarget === "cookingGuide" ? "已複製火候表" : "複製油炸/清蒸火候表"}
+                  {copiedTarget === "cookingGuide" ? "已複製目前指南" : "複製目前指南"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onCopy(cookingGuideText, "cookingGuide")}
+                  className="btn-muted inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition"
+                >
+                  <Clipboard className="h-4 w-4" />
+                  複製完整烹調指南
                 </button>
               </div>
             </div>
             <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-[20px] border border-[color:var(--line)] bg-[#0b1218] p-4 text-xs leading-6 text-[#d7d8d9]">
               {cookingReminderText}
             </pre>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {cookingGuides.map((guide) => {
+                const active = guide.key === activeCookingGuideKey;
+
+                return (
+                  <button
+                    key={guide.key}
+                    type="button"
+                    onClick={() => setActiveCookingGuideKey(guide.key)}
+                    className={`rounded-full border px-4 py-2 text-xs font-medium transition ${
+                      active
+                        ? "border-[color:var(--accent)] bg-[color:var(--accent)]/15 text-[color:var(--foreground)]"
+                        : "border-[color:var(--line)] bg-[color:var(--surface-strong)] text-[color:var(--muted)] hover:text-[color:var(--foreground)]"
+                    }`}
+                  >
+                    {guide.label}
+                  </button>
+                );
+              })}
+            </div>
+            {activeCookingGuide ? (
+              <div className="mt-4 rounded-[20px] border border-[color:var(--line)] bg-[#0b1218] p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
+                    <CookingPot className="h-4 w-4" />
+                    {activeCookingGuide.label}
+                  </p>
+                  <span className="rounded-full border border-[color:var(--accent)]/25 bg-[color:var(--accent)]/10 px-3 py-1 text-[11px] text-[color:var(--foreground)]">
+                    點按查閱
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                  {activeCookingGuide.summary}
+                </p>
+                <div className="mt-4 space-y-3">
+                  {activeCookingGuide.entries.map((entry) => (
+                    <div
+                      key={`${activeCookingGuide.key}-${entry.label}`}
+                      className="rounded-[18px] border border-[color:var(--line)] bg-[color:var(--surface-soft)] p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h3 className="text-sm font-semibold text-[color:var(--foreground)]">
+                          {entry.label}
+                        </h3>
+                        <span className="text-xs text-[color:var(--accent-strong)]">
+                          {entry.score}/10
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
+                        火候：{entry.temperature}
+                      </p>
+                      <p className="mt-1 text-sm leading-7 text-[color:var(--foreground)]">
+                        時間：{entry.duration}
+                      </p>
+                      <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                        {entry.note}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-5 rounded-[24px] border border-[color:var(--line)] bg-[color:var(--surface-soft)] p-5">

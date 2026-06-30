@@ -493,6 +493,7 @@ export function MenuApp() {
         thawGuideText={thawGuideText}
         cookingReminderText={cookingReminderText}
         cookingGuideText={cookingGuideText}
+        cookingGuides={cookingGuides}
         prompt={prompt}
         exportJson={exportJson}
         copiedTarget={copiedTarget}

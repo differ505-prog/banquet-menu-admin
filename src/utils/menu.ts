@@ -515,24 +515,32 @@ export const buildThawSummary = (dishes: MenuDish[]) => {
 
 export const getCookingGuides = (): CookingGuide[] => cookingGuides;
 
+export const getCookingGuide = (key: CookingGuide["key"]) =>
+  cookingGuides.find((guide) => guide.key === key) ?? null;
+
+export function buildCookingGuideSectionText(key: CookingGuide["key"]) {
+  const guide = getCookingGuide(key);
+
+  if (!guide) {
+    return "";
+  }
+
+  return [
+    guide.label,
+    guide.summary,
+    ...guide.entries.map(
+      (entry, index) =>
+        `${index + 1}. ${entry.label}\n` +
+        `   火候：${entry.temperature}\n` +
+        `   時間：${entry.duration}\n` +
+        `   重點：${entry.note}\n` +
+        `   評分：${entry.score}/10`,
+    ),
+  ].join("\n");
+}
+
 export function buildCookingGuideText() {
-  return cookingGuides
-    .map(
-      (guide) =>
-        [
-          guide.label,
-          guide.summary,
-          ...guide.entries.map(
-            (entry, index) =>
-              `${index + 1}. ${entry.label}\n` +
-              `   火候：${entry.temperature}\n` +
-              `   時間：${entry.duration}\n` +
-              `   重點：${entry.note}\n` +
-              `   評分：${entry.score}/10`,
-          ),
-        ].join("\n"),
-    )
-    .join("\n\n");
+  return cookingGuides.map((guide) => buildCookingGuideSectionText(guide.key)).join("\n\n");
 }
 
 export function buildDishCookingReminders(dishes: MenuDish[]): CookingReminder[] {

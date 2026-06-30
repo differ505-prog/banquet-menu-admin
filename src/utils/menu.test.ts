@@ -10,6 +10,7 @@ import {
 import {
   addRoleDishOption,
   buildCookingGuideText,
+  buildCookingGuideSectionText,
   buildCookingReminderText,
   buildCookingSummary,
   buildEvaluationPrompt,
@@ -473,6 +474,10 @@ describe("menu utilities", () => {
     expect(cookingGuideText).toContain("190°C");
     expect(cookingGuideText).toContain("冷凍魚丸 / 花枝丸");
     expect(cookingGuideText).toContain("冷凍米血糕 / 黑輪片");
+    expect(buildCookingGuideSectionText("air-fryer")).toContain("冷凍香腸");
+    expect(buildCookingGuideSectionText("air-fryer")).not.toContain("全魚 600g 至 800g");
+    expect(buildCookingGuideSectionText("steam")).toContain("全魚 600g 至 800g");
+    expect(buildCookingGuideSectionText("steam")).not.toContain("冷凍甜不辣");
     expect(cookingReminderText).toContain("【海鮮大菜】主菜｜破布子蒸午仔魚");
     expect(cookingReminderText).toContain("類型：魚類清蒸");
     expect(cookingSummary).toContain("清蒸");
