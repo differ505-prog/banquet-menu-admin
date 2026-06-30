@@ -235,6 +235,10 @@ describe("menu utilities", () => {
     expect(prompt).toContain("主動擴增菜品庫");
     expect(prompt).toContain("不需要拘泥於目前每個地位的候選數量");
     expect(prompt).toContain("系統設計面、資訊架構、欄位設計");
+    expect(prompt).toContain("食譜書／料理資料庫寫法");
+    expect(prompt).toContain("不要為了更好聽而任意升級食材");
+    expect(prompt).toContain("系統設計改善清單");
+    expect(prompt).toContain("問題、影響、改善方向、建議做法");
     expect(prompt).toContain("不要混入具體菜庫資料修改內容");
     expect(exportJson).toContain("\"title\": \"高預製度宴客候選菜庫\"");
     expect(exportJson).toContain("\"library\"");
