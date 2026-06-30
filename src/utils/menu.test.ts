@@ -233,6 +233,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("Appetizer_Cold_1");
     expect(prompt).toContain("Main_Seafood");
     expect(prompt).toContain("只接受中式料理體系");
+    expect(prompt).toContain("請分清楚『候選菜庫覆核』與『最終菜單覆核』");
+    expect(prompt).toContain("不可直接把同分類候選的相似性判定為最終上桌菜單已撞車");
     expect(prompt).toContain("整體評分（滿分 10 分");
     expect(prompt).toContain("給 LLM 的覆核提示詞");
     expect(prompt).toContain("可直接複製貼給 IDE 的菜庫修改提示詞");
@@ -243,6 +245,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("食材多樣性掃描");
     expect(prompt).toContain("重複菜色掃描");
     expect(prompt).toContain("高度預製適配性掃描");
+    expect(prompt).toContain("候選同質性過高");
+    expect(prompt).toContain("備選差異不足");
     expect(prompt).toContain("標準化建檔 Schema");
     expect(prompt).toContain("[Context] 區塊");
     expect(prompt).toContain("食譜書／料理資料庫寫法");
