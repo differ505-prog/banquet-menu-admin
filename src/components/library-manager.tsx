@@ -1,8 +1,24 @@
 "use client";
 
-import { Check, Clipboard, FileJson2, Plus, ScrollText, Sparkles, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  Clipboard,
+  FileJson2,
+  Plus,
+  Radar,
+  ScrollText,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 
-import type { CopyTarget, RoleDishLibrary, RoleDishOption } from "@/types/menu";
+import type {
+  CopyTarget,
+  PoolDiversityRadarItem,
+  PoolDiversityWarning,
+  RoleDishLibrary,
+  RoleDishOption,
+} from "@/types/menu";
 
 type LibraryManagerProps = {
   roles: string[];
@@ -22,6 +38,8 @@ type LibraryManagerProps = {
   onCopy: (value: string, target: "libraryPrompt" | "libraryJson") => void;
   libraryReviewPrompt: string;
   libraryExportJson: string;
+  poolWarnings: PoolDiversityWarning[];
+  diversityRadar: PoolDiversityRadarItem[];
 };
 
 const CopyBadge = ({ active }: { active: boolean }) =>
@@ -40,6 +58,8 @@ export function LibraryManager({
   onCopy,
   libraryReviewPrompt,
   libraryExportJson,
+  poolWarnings,
+  diversityRadar,
 }: LibraryManagerProps) {
   const options = library[activeRole] ?? [];
 
@@ -115,6 +135,92 @@ export function LibraryManager({
         <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
           點 `複製菜庫覆核指令` 可直接貼給 LLM，請它把「菜庫內容修改建議」與「未來覆核提示詞優化建議」分開輸出，最後各自整理成可直接貼回 IDE 的兩段提示詞。
         </p>
+      </div>
+
+      <div className="mt-6 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-[28px] border border-[color:var(--line)] bg-[color:var(--surface-soft)] p-5">
+          <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
+            <AlertTriangle className="h-4 w-4" />
+            Pool Builder 警示
+          </p>
+          {poolWarnings.length ? (
+            <div className="mt-4 space-y-3">
+              {poolWarnings.map((warning) => (
+                <article
+                  key={warning.id}
+                  className="rounded-[22px] border border-amber-200/15 bg-amber-200/10 p-4"
+                >
+                  <p className="text-xs font-medium tracking-[0.18em] text-amber-100">
+                    {warning.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-[color:var(--foreground)]">
+                    {warning.description}
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
+                    建議：{warning.recommendation}
+                  </p>
+                  <p className="mt-2 text-xs leading-6 text-[color:var(--muted)]">
+                    涉及菜色：{warning.dishes.join("、")}
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+              目前此分類沒有需要額外補強的同質性警示，Pool 多樣性維持穩定。
+            </p>
+          )}
+        </div>
+
+        <div className="rounded-[28px] border border-[color:var(--line)] bg-[color:var(--surface-soft)] p-5">
+          <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
+            <Radar className="h-4 w-4" />
+            多樣性雷達
+          </p>
+          {diversityRadar.length ? (
+            <div className="mt-4 space-y-3">
+              {diversityRadar.slice(0, 8).map((item) => (
+                <div
+                  key={`${item.category}-${item.label}`}
+                  className="rounded-[20px] border border-[color:var(--line)] bg-[color:var(--surface-strong)] p-4"
+                >
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[color:var(--foreground)]">
+                      {item.category === "primary_ingredient" ? "主食材" : "味型"}｜{item.label}
+                    </span>
+                    <span
+                      className={
+                        item.exceedsThreshold
+                          ? "text-amber-200"
+                          : "text-[color:var(--accent-strong)]"
+                      }
+                    >
+                      {(item.ratio * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-[color:var(--surface-soft)]">
+                    <div
+                      className={`h-full rounded-full ${
+                        item.exceedsThreshold ? "bg-amber-200" : "bg-[color:var(--accent)]"
+                      }`}
+                      style={{ width: `${Math.min(100, item.ratio * 100)}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs leading-6 text-[color:var(--muted)]">
+                    {item.count} / {item.total} 道
+                    {item.exceedsThreshold
+                      ? "，已超過 30%，建議補強多樣性。"
+                      : "，分布仍在可接受範圍。"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+              這個分類目前沒有足夠候選資料可供分析。
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 grid gap-4">

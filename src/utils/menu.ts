@@ -15,6 +15,8 @@ import type {
 } from "@/types/menu";
 import { cookingGuides } from "../data/cooking-guides";
 import {
+  buildPoolBuilderWarnings,
+  buildPoolDiversityRadar,
   enrichRoleDishOption,
   getEquivalentRoleNames,
   isPoolEligibleOption,
@@ -35,7 +37,11 @@ const isCookingProfileKey = (value: unknown): value is CookingProfileKey =>
   value === "reheat-veg";
 
 const isReheatMethod = (value: unknown): value is ReheatMethod =>
-  value === "GAS_STOVE" || value === "RICE_COOKER" || value === "MICROWAVE";
+  value === "GAS_STOVE" ||
+  value === "RICE_COOKER" ||
+  value === "MICROWAVE" ||
+  value === "OVEN" ||
+  value === "AIR_FRYER";
 
 const buildDishMetadataPatch = (source: {
   prepSuitabilityScore?: number;
@@ -46,6 +52,8 @@ const buildDishMetadataPatch = (source: {
   isFried?: boolean;
   freezeStableLeafyGreen?: boolean;
   requiresCrispyTexture?: boolean;
+  needsCrispiness?: boolean;
+  similarityFlags?: unknown;
 }) => ({
   prepSuitabilityScore: source.prepSuitabilityScore,
   reheatMethods: Array.isArray(source.reheatMethods)
@@ -57,6 +65,8 @@ const buildDishMetadataPatch = (source: {
   isFried: source.isFried,
   freezeStableLeafyGreen: source.freezeStableLeafyGreen,
   requiresCrispyTexture: source.requiresCrispyTexture,
+  needsCrispiness: source.needsCrispiness,
+  similarityFlags: Array.isArray(source.similarityFlags) ? source.similarityFlags : undefined,
 });
 
 const cookingProfileCopyMap: Record<
@@ -345,13 +355,17 @@ export const buildLibraryReviewPrompt = (library: RoleDishLibrary) => {
     "[Context & Constraints]",
     "- 料理體系：絕對純中式，允許正式、可見於食譜書與商業菜單資料庫的中式菜系與地方分支菜系，包含但不限於八大菜系、台菜、客家菜、本幫菜、潮州菜、京菜、大眾中式、中式點心。嚴禁西式、日式、南洋等異國元素及「融合菜」、「創意菜」。",
     "- 終端限制：高度依賴冷凍/冷藏預製包，終端覆熱設備僅限「瓦斯爐、電鍋、微波爐」。嚴禁需要烤箱、氣炸鍋或極度講究覆熱火候的菜色。",
-    "- 狀態辨識：請敏銳區分用戶輸入的是「候選菜庫（Pool）」還是「最終已選菜單（Final Menu）」。請於每一次對話初始，強制檢查用戶輸入內容是否包含『候選』『Pool』等字眼；若有，鎖定為 Pool 模式；若包含『請幫我配一桌』『最終菜單』等字眼，鎖定為 Final Menu 模式。在輸出任何評價前，必須先完成【強制狀態聲明】；若判定為 Pool，強制禁用『撞車』『重複度太高』『同桌上菜將發生撞車』等最終菜單語氣，改用『備選池同質性風險』『備選差異不足』『候選同質性過高』；若判定為 Final Menu，才可使用『菜色撞車』『味型失衡』『營養失衡』等最終成菜評語。",
+    "[State Detection & Constraints]",
+    "你必須在對話第一行強制判定用戶提供的是「Pool（候選池）」還是「Final Menu（最終菜單）」。",
+    "- 狀態判定觸發機制：請於每一次對話初始，強制檢查用戶輸入內容是否包含『候選』『Pool』等字眼。若有，鎖定為 Pool 模式；若包含『請幫我配一桌』『最終菜單』等字眼，鎖定為 Final Menu 模式。",
+    "- IF state == Pool：嚴格禁用詞彙：『撞車』『同桌』『成菜』『這桌菜』。遇到軟性重複時，只能標記為 `Yellow Warning：備選差異不足 / 候選同質性過高 / 備選池同質性風險`，絕對不可放入刪除名單。",
+    "- IF state == Final Menu：才可啟用『撞菜風險』『味型失衡』等詞彙。遇到軟性重複時，標記為 `Red Error：撞菜風險，強制替換`。",
     "- 菜系標註原則：若菜色已有明確且正式的地方菜系歸屬，應優先使用具體菜系名稱（如本幫菜、客家菜、潮州菜）；只有在無法準確細分時，才可收斂為「大眾中式」。",
     "- 刪除原則：只有在『同一道菜重複出現在不同分類』，或明確違反中式料理、終端設備、高預製適配性限制時，才可列入刪除或剔除名單。若只是食材、味型、烹法相近，應列為『同質性警告』，不可直接建議刪除。",
     "[Evaluation Process (4D Scan)]",
     "1. Diversity Scan（多樣性掃描）：檢查主食材、味型、烹法是否在同分類或跨分類中過度集中；若有，請標記『備選差異不足』或『候選同質性過高』。",
     "2. Schema Standardization（標準化掃描）：檢查菜名與菜系是否符合商業資料庫規範，並校正非正規菜系名稱；例如可將『涼拌』『傳統中式』等非正式標籤收斂為『大眾中式』。",
-    "3. Duplicate Scan（重複掃描）：定義兩層規則。硬性重複（Hard Duplicate）：完全相同的菜名跨分類出現，必須刪除。軟性重複（Soft Duplicate）：核心食材 + 烹調法 + 味型高度重疊。若是 Pool，只能觸發『Yellow Warning：備選差異不足』；若是 Final Menu，才可觸發『Red Error：撞菜風險，強制替換』。兩者不得混為一談。",
+    "3. Duplicate Handling / Duplicate Scan（重複掃描）：定義兩層規則。硬性重複（Hard Duplicate）：完全相同的菜名跨分類出現，必須刪除。軟性重複（Soft Duplicate）：核心食材 + 烹調法 + 味型高度重疊；例如五味中卷與五味九孔鮑、或柱侯蘿蔔燉牛腩與蘿蔔清燉牛腩。若是 Pool，只能觸發『Yellow Warning：備選差異不足』；若是 Final Menu，才可觸發『Red Error：撞菜風險，強制替換』。兩者不得混為一談。",
     "4. Prep-Suitability Rule（高預製適配性掃描）：強制標記並剔除依賴高溫油炸求酥脆、覆熱易出水糊化、綠色葉菜類、或超出指定終端設備的菜品。",
     "請用繁體中文輸出，並嚴格依照以下格式回覆：",
     "[Output Format]",
@@ -372,6 +386,10 @@ export const buildLibraryExportJson = (library: RoleDishLibrary) =>
       title: "高預製度宴客候選菜庫",
       summary: buildLibrarySummary(library),
       roleSchema: buildRoleSchemaEntries(Object.keys(library)),
+      poolWarnings: buildPoolBuilderWarnings(library),
+      diversityRadar: Object.fromEntries(
+        Object.keys(library).map((role) => [role, buildPoolDiversityRadar(library, role)]),
+      ),
       library,
       prompt: buildLibraryReviewPrompt(library),
     },

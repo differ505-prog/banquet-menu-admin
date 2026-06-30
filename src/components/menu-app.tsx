@@ -5,6 +5,8 @@ import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, Sparkles } fr
 
 import { defaultMenu } from "@/data/default-menu";
 import {
+  buildPoolBuilderWarnings,
+  buildPoolDiversityRadar,
   cloneRoleDishLibrary,
   createEmptyRoleDishOption,
 } from "@/data/role-dish-library";
@@ -180,6 +182,14 @@ export function MenuApp() {
   );
   const changedDishCount = getChangedDishCount(defaultMenu, state.dishes);
   const activeLibraryCount = libraryState[activeLibraryRole]?.length ?? 0;
+  const activeLibraryWarnings = useMemo(
+    () => buildPoolBuilderWarnings(libraryState, activeLibraryRole),
+    [activeLibraryRole, libraryState],
+  );
+  const activeLibraryRadar = useMemo(
+    () => buildPoolDiversityRadar(libraryState, activeLibraryRole),
+    [activeLibraryRole, libraryState],
+  );
 
   const applyLibraryOption = (option: (typeof libraryState)[string][number]) => {
     const targetDish = state.dishes.find((dish) => dish.role === option.role);
@@ -465,6 +475,8 @@ export function MenuApp() {
           onCopy={copyText}
           libraryReviewPrompt={libraryReviewPrompt}
           libraryExportJson={libraryExportJson}
+          poolWarnings={activeLibraryWarnings}
+          diversityRadar={activeLibraryRadar}
         />
 
         <div className="rounded-[30px] border border-[color:var(--line)] bg-[color:var(--surface)] p-5 backdrop-blur-xl">

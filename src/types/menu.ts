@@ -10,7 +10,46 @@ export type CookingProfileKey =
 
 export type CookingGuideKey = "steam" | "fry" | "air-fryer";
 
-export type ReheatMethod = "GAS_STOVE" | "RICE_COOKER" | "MICROWAVE";
+export type ReheatMethod =
+  | "GAS_STOVE"
+  | "RICE_COOKER"
+  | "MICROWAVE"
+  | "OVEN"
+  | "AIR_FRYER";
+
+export type SupportedPoolReheatMethod = Exclude<ReheatMethod, "OVEN" | "AIR_FRYER">;
+
+export type SimilarityFlagType = "high_similarity_pair" | "cross_category_similarity_pair";
+
+export type SimilarityFlag = {
+  type: SimilarityFlagType;
+  pairKey: string;
+  counterpartDishName: string;
+  counterpartRole: string;
+  recommendation: string;
+};
+
+export type PoolWarningLevel = "yellow" | "red";
+
+export type PoolDiversityRadarItem = {
+  category: "primary_ingredient" | "flavor_profile";
+  label: string;
+  count: number;
+  total: number;
+  ratio: number;
+  exceedsThreshold: boolean;
+};
+
+export type PoolDiversityWarning = {
+  id: string;
+  level: PoolWarningLevel;
+  role: string;
+  title: string;
+  description: string;
+  recommendation: string;
+  dishes: string[];
+  source: "radar" | "similarity_flag";
+};
 
 export type DishMetadata = {
   prepSuitabilityScore?: number;
@@ -21,6 +60,8 @@ export type DishMetadata = {
   isFried?: boolean;
   freezeStableLeafyGreen?: boolean;
   requiresCrispyTexture?: boolean;
+  needsCrispiness?: boolean;
+  similarityFlags?: SimilarityFlag[];
 };
 
 export type CopyTarget =

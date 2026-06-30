@@ -1,4 +1,13 @@
-import type { DishMetadata, ReheatMethod, RoleDishLibrary, RoleDishOption } from "@/types/menu";
+import type {
+  DishMetadata,
+  MenuDish,
+  PoolDiversityRadarItem,
+  PoolDiversityWarning,
+  ReheatMethod,
+  RoleDishLibrary,
+  RoleDishOption,
+  SupportedPoolReheatMethod,
+} from "@/types/menu";
 
 const roleAliasMap: Record<string, string> = {
   "【中場過場湯】湯品": "【承啟中湯】湯品",
@@ -61,7 +70,15 @@ const REHEAT_METHOD_LABELS: Record<ReheatMethod, string[]> = {
   GAS_STOVE: ["瓦斯爐"],
   RICE_COOKER: ["電鍋"],
   MICROWAVE: ["微波"],
+  OVEN: ["烤箱"],
+  AIR_FRYER: ["氣炸鍋", "氣炸烤箱", "氣炸"],
 };
+
+const SUPPORTED_POOL_REHEAT_METHODS: SupportedPoolReheatMethod[] = [
+  "GAS_STOVE",
+  "RICE_COOKER",
+  "MICROWAVE",
+];
 
 const parseReheatMethods = (premadeLevel: string): ReheatMethod[] =>
   (Object.entries(REHEAT_METHOD_LABELS) as Array<[ReheatMethod, string[]]>)
@@ -78,6 +95,8 @@ const inferPrimaryIngredient = (dishName: string, role: string) => {
   if (/(蝦|蟹|貝|鮑)/.test(dishName)) return "shellfish";
   if (/(海參|烏參|花膠)/.test(dishName)) return "sea_cucumber";
   if (/(豆腐|豆皮|腐竹|百葉|烤麩)/.test(dishName)) return "soy";
+  if (/藕/.test(dishName)) return "lotus_root";
+  if (/(米飯|炒飯|菜飯|米糕|油飯|糯米|拌麵|炒麵|蘿蔔糕)/.test(dishName)) return "staple";
   if (/(菇|雲耳|木耳|筍|娃娃菜|南瓜|冬瓜|蘿蔔|猴頭菇)/.test(dishName)) return "vegetable";
   if (role.includes("甜品")) return "dessert";
   if (role.includes("主食")) return "staple";
@@ -87,16 +106,24 @@ const inferPrimaryIngredient = (dishName: string, role: string) => {
 const inferFlavorProfile = (dishName: string) => {
   if (/(紅燒|柱侯|醬香|豉汁|豆豉)/.test(dishName)) return "soy_braised";
   if (/(蒜蓉|蒜頭)/.test(dishName)) return "garlic";
-  if (/(五味|紅油|麻辣|剁椒|XO醬|黑椒)/.test(dishName)) return "spiced_savory";
+  if (/(五味|紅油|麻辣|剁椒|XO醬|黑椒|椒麻)/.test(dishName)) return "spiced_savory";
   if (/(清燉|上湯|高湯|海鮮羹)/.test(dishName)) return "light_umami";
   if (/(花雕|酒釀|醉)/.test(dishName)) return "wine_aroma";
   if (/(蟹黃|蟹粉|鮑汁|金湯)/.test(dishName)) return "rich_umami";
+  if (/(桂花|冰糖)/.test(dishName)) return "sweet_aroma";
   if (/(甜|糖醋|酸菜)/.test(dishName)) return "sweet_sour";
   return "savory";
 };
 
-const inferLeafyGreen = (dishName: string) =>
-  /(娃娃菜|芥蘭|菠菜|青江菜|地瓜葉|空心菜|高麗菜|油菜|豆苗|刈菜)/.test(dishName);
+const inferLeafyGreen = (dishName: string, role: string) => {
+  if (role.includes("主食") && /(菜飯|炒飯|油飯|米糕|拌麵|炒麵|蘿蔔糕)/.test(dishName)) {
+    return false;
+  }
+
+  return /(娃娃菜|芥蘭|菠菜|青江菜|地瓜葉|空心菜|高麗菜|油菜|豆苗|刈菜)/.test(
+    dishName,
+  );
+};
 
 const inferFreezeStableLeafyGreen = (dishName: string) =>
   /(娃娃菜)/.test(dishName);
@@ -145,15 +172,19 @@ export const enrichRoleDishOption = (option: RoleDishOption): RoleDishOption => 
   const reheatMethods = option.reheatMethods?.length
     ? option.reheatMethods.filter(
         (method): method is ReheatMethod =>
-          method === "GAS_STOVE" || method === "RICE_COOKER" || method === "MICROWAVE",
+          method === "GAS_STOVE" ||
+          method === "RICE_COOKER" ||
+          method === "MICROWAVE" ||
+          method === "OVEN" ||
+          method === "AIR_FRYER",
       )
     : parseReheatMethods(option.premadeLevel);
-  const isLeafyGreen = option.isLeafyGreen ?? inferLeafyGreen(option.dishName);
+  const isLeafyGreen = option.isLeafyGreen ?? inferLeafyGreen(option.dishName, option.role);
   const freezeStableLeafyGreen =
     option.freezeStableLeafyGreen ?? inferFreezeStableLeafyGreen(option.dishName);
   const isFried = option.isFried ?? inferIsFried(option.dishName, option.premadeLevel);
   const requiresCrispyTexture =
-    option.requiresCrispyTexture ?? inferRequiresCrispyTexture(option.dishName);
+    option.requiresCrispyTexture ?? option.needsCrispiness ?? inferRequiresCrispyTexture(option.dishName);
 
   return {
     ...option,
@@ -164,6 +195,7 @@ export const enrichRoleDishOption = (option: RoleDishOption): RoleDishOption => 
     freezeStableLeafyGreen,
     isFried,
     requiresCrispyTexture,
+    needsCrispiness: option.needsCrispiness ?? requiresCrispyTexture,
     prepSuitabilityScore:
       option.prepSuitabilityScore ??
       inferPrepSuitabilityScore(option.dishName, option.premadeLevel, {
@@ -172,6 +204,7 @@ export const enrichRoleDishOption = (option: RoleDishOption): RoleDishOption => 
         isFried,
         requiresCrispyTexture,
       }),
+    similarityFlags: option.similarityFlags,
   };
 };
 
@@ -183,7 +216,11 @@ export const getPoolValidationIssues = (option: RoleDishOption) => {
     issues.push("prep_suitability_score_below_threshold");
   }
 
-  if (!hydrated.reheatMethods?.every((method) => ["GAS_STOVE", "RICE_COOKER", "MICROWAVE"].includes(method))) {
+  if (
+    !hydrated.reheatMethods?.every((method) =>
+      SUPPORTED_POOL_REHEAT_METHODS.includes(method as SupportedPoolReheatMethod),
+    )
+  ) {
     issues.push("unsupported_reheat_method");
   }
 
@@ -200,6 +237,217 @@ export const getPoolValidationIssues = (option: RoleDishOption) => {
 
 export const isPoolEligibleOption = (option: RoleDishOption) =>
   getPoolValidationIssues(option).length === 0;
+
+export class PoolValidationException extends Error {
+  issues: string[];
+
+  constructor(message: string, issues: string[]) {
+    super(message);
+    this.name = "PoolValidationException";
+    this.issues = issues;
+  }
+}
+
+export class UnsupportedTerminalEquipmentException extends PoolValidationException {
+  constructor(issues: string[]) {
+    super("偵測到 OVEN 或 AIR_FRYER，已超出 Pool 支援的終端覆熱設備。", issues);
+    this.name = "UnsupportedTerminalEquipmentException";
+  }
+}
+
+export class ConstraintViolationException extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConstraintViolationException";
+  }
+}
+
+export const validatePoolOptionOrThrow = (option: RoleDishOption) => {
+  const issues = getPoolValidationIssues(option);
+
+  if (!issues.length) {
+    return enrichRoleDishOption(option);
+  }
+
+  if (issues.includes("unsupported_reheat_method")) {
+    throw new UnsupportedTerminalEquipmentException(issues);
+  }
+
+  throw new PoolValidationException("候選菜未通過 Pool 驗證，已阻止寫入。", issues);
+};
+
+const toComparableDishOption = (
+  dish: Pick<RoleDishOption, "role" | "dishName" | "cuisine" | "premadeLevel"> &
+    Partial<Pick<RoleDishOption, "thawProfile" | "cookingProfile">>,
+) => {
+  const matchedLibraryOption = (roleDishLibrary[normalizeRoleName(dish.role)] ?? []).find(
+    (option) => option.dishName === dish.dishName,
+  );
+
+  return enrichRoleDishOption({
+    libraryId: `compare-${dish.role}-${dish.dishName}`,
+    thawProfile:
+      dish.thawProfile ??
+      matchedLibraryOption?.thawProfile ??
+      getRoleDefaultProfiles(dish.role).thawProfile,
+    cookingProfile:
+      dish.cookingProfile ??
+      matchedLibraryOption?.cookingProfile ??
+      getRoleDefaultProfiles(dish.role).cookingProfile,
+    similarityFlags: matchedLibraryOption?.similarityFlags,
+    ...dish,
+  });
+};
+
+export const getFinalMenuConstraintViolations = (dishes: MenuDish[]) => {
+  const hydrated = dishes.map((dish) => toComparableDishOption(dish));
+  const softDuplicateMap = hydrated.reduce<Record<string, typeof hydrated>>((accumulator, dish) => {
+    const key = `${dish.primaryIngredient ?? "mixed"}:${dish.cookingProfile}:${dish.flavorProfile ?? "savory"}`;
+    accumulator[key] = [...(accumulator[key] ?? []), dish];
+    return accumulator;
+  }, {});
+  const byShape = Object.values(softDuplicateMap)
+    .filter((group) => group.length > 1)
+    .map((group) => ({
+      key: `${group[0]?.primaryIngredient ?? "mixed"}:${group[0]?.flavorProfile ?? "savory"}`,
+      dishes: group.map((dish) => `${dish.role}｜${dish.dishName}`),
+      message: `Red Error：${group.map((dish) => dish.dishName).join("、")} 屬於同質節點，請替換其一。`,
+    }));
+  const byFlag = hydrated.flatMap((dish) =>
+    (dish.similarityFlags ?? [])
+      .filter((flag) =>
+        hydrated.some(
+          (candidate) =>
+            candidate.dishName === flag.counterpartDishName &&
+            normalizeRoleName(candidate.role) === normalizeRoleName(flag.counterpartRole),
+        ),
+      )
+      .map((flag) => ({
+        key: flag.pairKey,
+        dishes: [
+          `${dish.role}｜${dish.dishName}`,
+          `${flag.counterpartRole}｜${flag.counterpartDishName}`,
+        ],
+        message: `Red Error：${dish.dishName} 與 ${flag.counterpartDishName} 已被標記為 ${flag.type}，進入 Final Menu 時需強制替換其一。`,
+      })),
+  );
+
+  return [...byShape, ...byFlag].filter(
+    (violation, index, list) => list.findIndex((item) => item.key === violation.key) === index,
+  );
+};
+
+const pushUniqueWarning = (
+  warnings: PoolDiversityWarning[],
+  warning: PoolDiversityWarning,
+) => {
+  if (!warnings.some((item) => item.id === warning.id)) {
+    warnings.push(warning);
+  }
+};
+
+export const buildPoolDiversityRadar = (
+  library: RoleDishLibrary,
+  role: string,
+): PoolDiversityRadarItem[] => {
+  const options = (library[normalizeRoleName(role)] ?? []).map(enrichRoleDishOption);
+  const total = options.length;
+
+  if (!total) {
+    return [];
+  }
+
+  const ingredientCounts = options.reduce<Record<string, number>>((accumulator, option) => {
+    const key = option.primaryIngredient ?? "mixed";
+    accumulator[key] = (accumulator[key] ?? 0) + 1;
+    return accumulator;
+  }, {});
+  const flavorCounts = options.reduce<Record<string, number>>((accumulator, option) => {
+    const key = option.flavorProfile ?? "savory";
+    accumulator[key] = (accumulator[key] ?? 0) + 1;
+    return accumulator;
+  }, {});
+
+  return [
+    ...Object.entries(ingredientCounts).map(([label, count]) => ({
+      category: "primary_ingredient" as const,
+      label,
+      count,
+      total,
+      ratio: count / total,
+      exceedsThreshold: count / total > 0.3,
+    })),
+    ...Object.entries(flavorCounts).map(([label, count]) => ({
+      category: "flavor_profile" as const,
+      label,
+      count,
+      total,
+      ratio: count / total,
+      exceedsThreshold: count / total > 0.3,
+    })),
+  ].sort((left, right) => right.ratio - left.ratio);
+};
+
+export const buildPoolBuilderWarnings = (
+  library: RoleDishLibrary,
+  role?: string,
+): PoolDiversityWarning[] => {
+  const roles = role ? [normalizeRoleName(role)] : Object.keys(library);
+  const warnings: PoolDiversityWarning[] = [];
+
+  roles.forEach((currentRole) => {
+    const options = (library[currentRole] ?? []).map(enrichRoleDishOption);
+    const radarItems = buildPoolDiversityRadar(library, currentRole).filter(
+      (item) => item.exceedsThreshold,
+    );
+
+    radarItems.forEach((item) => {
+      pushUniqueWarning(warnings, {
+        id: `radar:${currentRole}:${item.category}:${item.label}`,
+        level: "yellow",
+        role: currentRole,
+        title: "Yellow Warning：候選同質性過高",
+        description: `${currentRole} 的 ${item.category === "primary_ingredient" ? "主食材" : "味型"}「${item.label}」占比 ${(item.ratio * 100).toFixed(0)}%。`,
+        recommendation:
+          item.category === "primary_ingredient"
+            ? "建議補入不同主蛋白或非同部位食材，稀釋備選差異不足。"
+            : "建議補入不同調味路線，避免同一分類集中在單一味型。",
+        dishes: options
+          .filter((option) =>
+            item.category === "primary_ingredient"
+              ? option.primaryIngredient === item.label
+              : option.flavorProfile === item.label,
+          )
+          .map((option) => option.dishName),
+        source: "radar",
+      });
+    });
+
+    options.forEach((option) => {
+      (option.similarityFlags ?? []).forEach((flag) => {
+        pushUniqueWarning(warnings, {
+          id: `flag:${flag.pairKey}:${option.dishName}`,
+          level: "yellow",
+          role: currentRole,
+          title:
+            flag.type === "cross_category_similarity_pair"
+              ? "Yellow Warning：跨分類同質性風險"
+              : "Yellow Warning：備選差異不足",
+          description: `${option.dishName} 與 ${flag.counterpartRole} 的 ${flag.counterpartDishName} 已標記為 ${
+            flag.type === "cross_category_similarity_pair"
+              ? "cross_category_similarity_pair"
+              : "high_similarity_pair"
+          }。`,
+          recommendation: flag.recommendation,
+          dishes: [option.dishName, flag.counterpartDishName],
+          source: "similarity_flag",
+        });
+      });
+    });
+  });
+
+  return warnings;
+};
 
 export const roleDishLibrary: RoleDishLibrary = {
   "【迎賓冷盤一】迎賓冷盤": [
@@ -233,7 +481,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     {
       libraryId: "left-cold-5",
       role: "【迎賓冷盤一】迎賓冷盤",
-      dishName: "煙燻甘蔗雞",
+      dishName: "糖燻甘蔗雞",
       cuisine: "台菜",
       premadeLevel: "解凍即食",
       thawProfile: "meat",
@@ -253,6 +501,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       role: "【迎賓冷盤一】迎賓冷盤",
       dishName: "紅油拌腐竹",
       cuisine: "川菜",
+      premadeLevel: "解凍即食",
+      thawProfile: "other",
+      cookingProfile: "cold-serve",
+    },
+    {
+      libraryId: "left-cold-8",
+      role: "【迎賓冷盤一】迎賓冷盤",
+      dishName: "桂花冰糖糯米藕",
+      cuisine: "江浙菜",
       premadeLevel: "解凍即食",
       thawProfile: "other",
       cookingProfile: "cold-serve",
@@ -304,6 +561,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       thawProfile: "other",
       cookingProfile: "cold-serve",
     },
+    {
+      libraryId: "right-cold-8",
+      role: "【迎賓冷盤二】迎賓冷盤",
+      dishName: "川味椒麻拌牛肚",
+      cuisine: "川菜",
+      premadeLevel: "解凍即食",
+      thawProfile: "meat",
+      cookingProfile: "cold-serve",
+    },
   ],
   "【燒燴大菜】主菜": [
     {
@@ -323,6 +589,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "瓦斯爐收汁加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
+      similarityFlags: [
+        {
+          type: "high_similarity_pair",
+          pairKey: "jiangnan-ribs",
+          counterpartDishName: "鎮江排骨",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "兩道可並存於 Pool，但建議補入非甜酸收汁路線的大菜，稀釋江南排骨系備選的同質性。",
+        },
+      ],
     },
     {
       libraryId: "vice-main-3",
@@ -350,6 +625,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "電鍋/瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
+      similarityFlags: [
+        {
+          type: "cross_category_similarity_pair",
+          pairKey: "beef-radish-cross-role",
+          counterpartDishName: "蘿蔔清燉牛腩",
+          counterpartRole: "【承啟中湯】湯品",
+          recommendation: "保留兩道無妨，但 Pool Builder 應提示補入非牛腩或非蘿蔔路線候選，避免跨分類仍集中於同一核心食材組合。",
+        },
+      ],
     },
     {
       libraryId: "vice-main-7",
@@ -359,6 +643,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "瓦斯爐收汁加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
+      similarityFlags: [
+        {
+          type: "high_similarity_pair",
+          pairKey: "jiangnan-ribs",
+          counterpartDishName: "無錫排骨",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "兩道可並存於 Pool，但建議補入非甜酸收汁路線的大菜，稀釋江南排骨系備選的同質性。",
+        },
+      ],
     },
     {
       libraryId: "vice-main-9",
@@ -491,7 +784,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     {
       libraryId: "main-fish-13",
       role: "【海鮮大菜】主菜",
-      dishName: "酒釀乾燒蝦",
+      dishName: "酒釀乾燒大蝦",
       cuisine: "川菜",
       premadeLevel: "微波/瓦斯爐加熱",
       thawProfile: "shrimp",
@@ -552,6 +845,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-soup",
+      similarityFlags: [
+        {
+          type: "cross_category_similarity_pair",
+          pairKey: "beef-radish-cross-role",
+          counterpartDishName: "柱侯蘿蔔燉牛腩",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "可保留於不同分類，但應補入非牛腩或非蘿蔔路線的候選，避免 Pool 在跨分類上仍集中同一組核心食材。",
+        },
+      ],
     },
     {
       libraryId: "soup-meat-4",
@@ -564,15 +866,6 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
   ],
   "【燴扒蔬蕈】蔬菜": [
-    {
-      libraryId: "veg-1",
-      role: "【燴扒蔬蕈】蔬菜",
-      dishName: "上湯煨娃娃菜",
-      cuisine: "粵菜",
-      premadeLevel: "電鍋/微波加熱",
-      thawProfile: "other",
-      cookingProfile: "reheat-veg",
-    },
     {
       libraryId: "veg-6",
       role: "【燴扒蔬蕈】蔬菜",
@@ -635,6 +928,16 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "微波/瓦斯爐加熱",
       thawProfile: "other",
       cookingProfile: "reheat-veg",
+    },
+    {
+      libraryId: "veg-13",
+      role: "【燴扒蔬蕈】蔬菜",
+      dishName: "雞湯煨雙冬",
+      cuisine: "江浙菜",
+      premadeLevel: "微波/電鍋加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+      reheatMethods: ["MICROWAVE", "RICE_COOKER"],
     },
   ],
   "【主食飯麵】主食": [
@@ -706,6 +1009,24 @@ export const roleDishLibrary: RoleDishLibrary = {
       role: "【主食飯麵】主食",
       dishName: "上海菜飯",
       cuisine: "本幫菜",
+      premadeLevel: "微波/電鍋加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-16",
+      role: "【主食飯麵】主食",
+      dishName: "揚州香蒜叉燒炒飯",
+      cuisine: "粵菜",
+      premadeLevel: "微波加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-17",
+      role: "【主食飯麵】主食",
+      dishName: "台式古早味高麗菜飯",
+      cuisine: "台菜",
       premadeLevel: "微波/電鍋加熱",
       thawProfile: "other",
       cookingProfile: "reheat-rice",
@@ -835,6 +1156,8 @@ export const createEmptyRoleDishOption = (role: string): RoleDishOption => ({
   isFried: false,
   freezeStableLeafyGreen: false,
   requiresCrispyTexture: false,
+  needsCrispiness: false,
+  similarityFlags: [],
   ...getRoleDefaultProfiles(role),
 });
 
