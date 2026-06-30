@@ -1,31 +1,31 @@
 import type { RoleDishLibrary, RoleDishOption } from "@/types/menu";
 
 const getRoleDefaultProfiles = (role: string) => {
-  if (role.includes("主帥")) {
+  if (role.includes("海鮮大菜")) {
     return { thawProfile: "fish", cookingProfile: "steam-fish" } as const;
   }
 
-  if (role.includes("開胃冷盤")) {
+  if (role.includes("迎賓冷盤")) {
     return { thawProfile: "other", cookingProfile: "cold-serve" } as const;
   }
 
-  if (role.includes("重口味大菜") || role.includes("功夫清湯肉")) {
+  if (role.includes("燒燴大菜")) {
     return { thawProfile: "meat", cookingProfile: "reheat-braise" } as const;
   }
 
-  if (role.includes("素淨小菜")) {
-    return { thawProfile: "other", cookingProfile: "reheat-veg" } as const;
-  }
-
-  if (role.includes("主食")) {
-    return { thawProfile: "other", cookingProfile: "reheat-rice" } as const;
-  }
-
-  if (role.includes("壓軸大湯")) {
+  if (role.includes("中場過場湯") || role.includes("壓軸燉湯")) {
     return { thawProfile: "meat", cookingProfile: "reheat-soup" } as const;
   }
 
-  if (role.includes("甜品")) {
+  if (role.includes("季節時蔬")) {
+    return { thawProfile: "other", cookingProfile: "reheat-veg" } as const;
+  }
+
+  if (role.includes("主食飯麵")) {
+    return { thawProfile: "other", cookingProfile: "reheat-rice" } as const;
+  }
+
+  if (role.includes("中式甜品")) {
     return { thawProfile: "other", cookingProfile: "steam-dessert" } as const;
   }
 
@@ -33,10 +33,10 @@ const getRoleDefaultProfiles = (role: string) => {
 };
 
 export const roleDishLibrary: RoleDishLibrary = {
-  "【左先鋒】開胃冷盤": [
+  "【迎賓冷盤一】迎賓冷盤": [
     {
       libraryId: "left-cold-1",
-      role: "【左先鋒】開胃冷盤",
+      role: "【迎賓冷盤一】迎賓冷盤",
       dishName: "五香醬牛腱",
       cuisine: "魯菜",
       premadeLevel: "解凍即食",
@@ -45,7 +45,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "left-cold-2",
-      role: "【左先鋒】開胃冷盤",
+      role: "【迎賓冷盤一】迎賓冷盤",
       dishName: "鎮江水晶肴肉",
       cuisine: "江浙菜",
       premadeLevel: "解凍即食",
@@ -54,18 +54,36 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "left-cold-3",
-      role: "【左先鋒】開胃冷盤",
-      dishName: "蒜香涼拌海蜇頭",
-      cuisine: "粵菜",
+      role: "【迎賓冷盤一】迎賓冷盤",
+      dishName: "老醋陳皮拌雲耳",
+      cuisine: "涼拌",
       premadeLevel: "解凍即食",
       thawProfile: "other",
       cookingProfile: "cold-serve",
     },
+    {
+      libraryId: "left-cold-4",
+      role: "【迎賓冷盤一】迎賓冷盤",
+      dishName: "冰糖醬鴨",
+      cuisine: "江浙菜",
+      premadeLevel: "解凍即食",
+      thawProfile: "meat",
+      cookingProfile: "cold-serve",
+    },
+    {
+      libraryId: "left-cold-5",
+      role: "【迎賓冷盤一】迎賓冷盤",
+      dishName: "煙燻甘蔗雞",
+      cuisine: "台菜",
+      premadeLevel: "解凍即食",
+      thawProfile: "meat",
+      cookingProfile: "cold-serve",
+    },
   ],
-  "【右先鋒】開胃冷盤": [
+  "【迎賓冷盤二】迎賓冷盤": [
     {
       libraryId: "right-cold-1",
-      role: "【右先鋒】開胃冷盤",
+      role: "【迎賓冷盤二】迎賓冷盤",
       dishName: "紹興醉白蝦",
       cuisine: "江浙菜",
       premadeLevel: "解凍即食",
@@ -74,27 +92,45 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "right-cold-2",
-      role: "【右先鋒】開胃冷盤",
-      dishName: "煙燻甘蔗雞",
-      cuisine: "台菜",
+      role: "【迎賓冷盤二】迎賓冷盤",
+      dishName: "蒜香涼拌海蜇頭",
+      cuisine: "粵菜",
       premadeLevel: "解凍即食",
-      thawProfile: "meat",
+      thawProfile: "other",
       cookingProfile: "cold-serve",
     },
     {
       libraryId: "right-cold-3",
-      role: "【右先鋒】開胃冷盤",
+      role: "【迎賓冷盤二】迎賓冷盤",
       dishName: "蒜泥白肉",
       cuisine: "川菜",
-      premadeLevel: "電鍋回溫後冷食",
+      premadeLevel: "解凍後水煮溫熱食",
+      thawProfile: "meat",
+      cookingProfile: "reheat-braise",
+    },
+    {
+      libraryId: "right-cold-4",
+      role: "【迎賓冷盤二】迎賓冷盤",
+      dishName: "五味冰卷",
+      cuisine: "台菜",
+      premadeLevel: "解凍即食",
+      thawProfile: "other",
+      cookingProfile: "cold-serve",
+    },
+    {
+      libraryId: "right-cold-5",
+      role: "【迎賓冷盤二】迎賓冷盤",
+      dishName: "冰糖醬鴨",
+      cuisine: "江浙菜",
+      premadeLevel: "解凍即食",
       thawProfile: "meat",
       cookingProfile: "cold-serve",
     },
   ],
-  "【副帥】重口味大菜": [
+  "【燒燴大菜】主菜": [
     {
       libraryId: "vice-main-1",
-      role: "【副帥】重口味大菜",
+      role: "【燒燴大菜】主菜",
       dishName: "杭州東坡肉",
       cuisine: "江浙菜",
       premadeLevel: "電鍋/瓦斯爐加熱",
@@ -103,7 +139,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "vice-main-2",
-      role: "【副帥】重口味大菜",
+      role: "【燒燴大菜】主菜",
       dishName: "無錫排骨",
       cuisine: "江浙菜",
       premadeLevel: "瓦斯爐收汁加熱",
@@ -112,27 +148,45 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "vice-main-3",
-      role: "【副帥】重口味大菜",
+      role: "【燒燴大菜】主菜",
       dishName: "梅干扣肉",
       cuisine: "客家菜",
       premadeLevel: "電鍋蒸熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
     },
-  ],
-  "【主帥】壓軸定海神針": [
     {
-      libraryId: "main-fish-1",
-      role: "【主帥】壓軸定海神針",
-      dishName: "古法樹子蒸鱸魚",
-      cuisine: "台菜",
-      premadeLevel: "電鍋蒸熱",
-      thawProfile: "fish",
-      cookingProfile: "steam-fish",
+      libraryId: "vice-main-4",
+      role: "【燒燴大菜】主菜",
+      dishName: "蔥燒鮮烏參",
+      cuisine: "魯菜",
+      premadeLevel: "微波加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-braise",
     },
     {
+      libraryId: "vice-main-5",
+      role: "【燒燴大菜】主菜",
+      dishName: "紅酒燉牛小排",
+      cuisine: "融合菜",
+      premadeLevel: "瓦斯爐加熱",
+      thawProfile: "meat",
+      cookingProfile: "reheat-braise",
+    },
+    {
+      libraryId: "vice-main-6",
+      role: "【燒燴大菜】主菜",
+      dishName: "芋泥香酥鴨",
+      cuisine: "粵菜",
+      premadeLevel: "氣炸或烤箱加熱",
+      thawProfile: "meat",
+      cookingProfile: "reheat-braise",
+    },
+  ],
+  "【海鮮大菜】主菜": [
+    {
       libraryId: "main-fish-2",
-      role: "【主帥】壓軸定海神針",
+      role: "【海鮮大菜】主菜",
       dishName: "豆豉清蒸石斑魚",
       cuisine: "粵菜",
       premadeLevel: "電鍋蒸熱",
@@ -141,47 +195,74 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "main-fish-3",
-      role: "【主帥】壓軸定海神針",
+      role: "【海鮮大菜】主菜",
       dishName: "破布子蒸午仔魚",
       cuisine: "台菜",
       premadeLevel: "電鍋蒸熱",
       thawProfile: "fish",
       cookingProfile: "steam-fish",
     },
+    {
+      libraryId: "main-fish-4",
+      role: "【海鮮大菜】主菜",
+      dishName: "糖醋溜鰈魚",
+      cuisine: "魯菜",
+      premadeLevel: "氣炸鍋與醬汁加熱",
+      thawProfile: "fish",
+      cookingProfile: "reheat-braise",
+    },
+    {
+      libraryId: "main-fish-5",
+      role: "【海鮮大菜】主菜",
+      dishName: "蒜蓉粉絲蒸扇貝",
+      cuisine: "粵菜",
+      premadeLevel: "電鍋蒸熱",
+      thawProfile: "other",
+      cookingProfile: "steam-fish",
+    },
+    {
+      libraryId: "main-fish-6",
+      role: "【海鮮大菜】主菜",
+      dishName: "乾燒明蝦",
+      cuisine: "川菜",
+      premadeLevel: "瓦斯爐加熱",
+      thawProfile: "shrimp",
+      cookingProfile: "reheat-braise",
+    },
   ],
-  "【溫潤後勤】功夫清湯肉": [
+  "【中場過場湯】湯品": [
     {
       libraryId: "soup-meat-1",
-      role: "【溫潤後勤】功夫清湯肉",
+      role: "【中場過場湯】湯品",
       dishName: "清燉獅子頭",
       cuisine: "淮揚菜",
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
-      cookingProfile: "reheat-braise",
+      cookingProfile: "reheat-soup",
     },
     {
       libraryId: "soup-meat-2",
-      role: "【溫潤後勤】功夫清湯肉",
+      role: "【中場過場湯】湯品",
       dishName: "砂鍋醃篤鮮",
       cuisine: "江浙菜",
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
-      cookingProfile: "reheat-braise",
+      cookingProfile: "reheat-soup",
     },
     {
       libraryId: "soup-meat-3",
-      role: "【溫潤後勤】功夫清湯肉",
+      role: "【中場過場湯】湯品",
       dishName: "蘿蔔清燉牛腩",
-      cuisine: "台式家常",
+      cuisine: "台菜",
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
-      cookingProfile: "reheat-braise",
+      cookingProfile: "reheat-soup",
     },
   ],
-  "【清口綠葉】素淨小菜": [
+  "【季節時蔬】蔬菜": [
     {
       libraryId: "veg-1",
-      role: "【清口綠葉】素淨小菜",
+      role: "【季節時蔬】蔬菜",
       dishName: "上湯煨娃娃菜",
       cuisine: "粵菜",
       premadeLevel: "電鍋/微波加熱",
@@ -190,36 +271,36 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "veg-2",
-      role: "【清口綠葉】素淨小菜",
-      dishName: "蟹粉扒津白",
-      cuisine: "淮揚菜",
-      premadeLevel: "電鍋加熱",
+      role: "【季節時蔬】蔬菜",
+      dishName: "百果炒芥菜",
+      cuisine: "台菜",
+      premadeLevel: "微波加熱",
       thawProfile: "other",
       cookingProfile: "reheat-veg",
     },
     {
       libraryId: "veg-3",
-      role: "【清口綠葉】素淨小菜",
-      dishName: "干貝絲燴白菜",
+      role: "【季節時蔬】蔬菜",
+      dishName: "蘆筍炒百合",
       cuisine: "台菜",
-      premadeLevel: "微波/瓦斯爐加熱",
+      premadeLevel: "微波加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+    },
+    {
+      libraryId: "veg-4",
+      role: "【季節時蔬】蔬菜",
+      dishName: "金沙綠竹筍",
+      cuisine: "台菜",
+      premadeLevel: "烤箱加熱",
       thawProfile: "other",
       cookingProfile: "reheat-veg",
     },
   ],
-  "【飽腹擔當】主食": [
-    {
-      libraryId: "staple-1",
-      role: "【飽腹擔當】主食",
-      dishName: "廣式臘味糯米飯",
-      cuisine: "粵菜",
-      premadeLevel: "電鍋加熱",
-      thawProfile: "other",
-      cookingProfile: "reheat-rice",
-    },
+  "【主食飯麵】主食": [
     {
       libraryId: "staple-2",
-      role: "【飽腹擔當】主食",
+      role: "【主食飯麵】主食",
       dishName: "櫻花蝦油飯",
       cuisine: "台菜",
       premadeLevel: "電鍋加熱",
@@ -228,18 +309,36 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "staple-3",
-      role: "【飽腹擔當】主食",
-      dishName: "干貝芋香米糕",
-      cuisine: "台菜",
+      role: "【主食飯麵】主食",
+      dishName: "櫻花蝦 XO 醬炒飯",
+      cuisine: "粵菜",
+      premadeLevel: "微波加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-4",
+      role: "【主食飯麵】主食",
+      dishName: "干燒伊麵",
+      cuisine: "粵菜",
+      premadeLevel: "微波加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-5",
+      role: "【主食飯麵】主食",
+      dishName: "奶黃壽桃包",
+      cuisine: "中式點心",
       premadeLevel: "電鍋蒸熱",
       thawProfile: "other",
       cookingProfile: "reheat-rice",
     },
   ],
-  "【靈魂洗滌】壓軸大湯": [
+  "【壓軸燉湯】湯品": [
     {
       libraryId: "soup-1",
-      role: "【靈魂洗滌】壓軸大湯",
+      role: "【壓軸燉湯】湯品",
       dishName: "原盅蒜頭燉土雞湯",
       cuisine: "台菜",
       premadeLevel: "瓦斯爐加熱",
@@ -248,7 +347,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "soup-2",
-      role: "【靈魂洗滌】壓軸大湯",
+      role: "【壓軸燉湯】湯品",
       dishName: "干貝竹笙雞湯",
       cuisine: "粵菜",
       premadeLevel: "瓦斯爐加熱",
@@ -257,18 +356,27 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "soup-3",
-      role: "【靈魂洗滌】壓軸大湯",
-      dishName: "剝皮辣椒燉雞湯",
+      role: "【壓軸燉湯】湯品",
+      dishName: "台式佛跳牆",
       cuisine: "台菜",
+      premadeLevel: "電鍋加熱",
+      thawProfile: "meat",
+      cookingProfile: "reheat-soup",
+    },
+    {
+      libraryId: "soup-4",
+      role: "【壓軸燉湯】湯品",
+      dishName: "白胡椒豬肚排骨湯",
+      cuisine: "客家菜",
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-soup",
     },
   ],
-  "【甜蜜餘韻】甜品": [
+  "【中式甜品】甜品": [
     {
       libraryId: "dessert-1",
-      role: "【甜蜜餘韻】甜品",
+      role: "【中式甜品】甜品",
       dishName: "冰糖紫米紅豆湯",
       cuisine: "傳統中式",
       premadeLevel: "電鍋蒸熱",
@@ -277,7 +385,7 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "dessert-2",
-      role: "【甜蜜餘韻】甜品",
+      role: "【中式甜品】甜品",
       dishName: "桂圓銀耳蓮子湯",
       cuisine: "傳統中式",
       premadeLevel: "電鍋蒸熱",
@@ -286,10 +394,19 @@ export const roleDishLibrary: RoleDishLibrary = {
     },
     {
       libraryId: "dessert-3",
-      role: "【甜蜜餘韻】甜品",
-      dishName: "紅豆年糕甜湯",
-      cuisine: "台式甜品",
-      premadeLevel: "電鍋加熱",
+      role: "【中式甜品】甜品",
+      dishName: "芋泥椰汁西米露",
+      cuisine: "粵菜",
+      premadeLevel: "解凍即食冷食",
+      thawProfile: "other",
+      cookingProfile: "cold-serve",
+    },
+    {
+      libraryId: "dessert-4",
+      role: "【中式甜品】甜品",
+      dishName: "冰糖燉雪梨",
+      cuisine: "中式",
+      premadeLevel: "電鍋熱食或冷飲",
       thawProfile: "other",
       cookingProfile: "steam-dessert",
     },

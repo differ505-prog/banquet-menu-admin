@@ -3,7 +3,7 @@ import type { MenuDish } from "@/types/menu";
 export const defaultMenu: MenuDish[] = [
   {
     id: "1",
-    role: "【左先鋒】開胃冷盤",
+    role: "【迎賓冷盤一】迎賓冷盤",
     dishName: "五香醬牛腱",
     cuisine: "魯菜",
     premadeLevel: "解凍即食",
@@ -12,7 +12,7 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "2",
-    role: "【右先鋒】開胃冷盤",
+    role: "【迎賓冷盤二】迎賓冷盤",
     dishName: "紹興醉白蝦",
     cuisine: "江浙菜",
     premadeLevel: "解凍即食",
@@ -21,7 +21,7 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "3",
-    role: "【副帥】重口味大菜",
+    role: "【燒燴大菜】主菜",
     dishName: "杭州東坡肉",
     cuisine: "江浙菜",
     premadeLevel: "電鍋/瓦斯爐加熱",
@@ -30,8 +30,8 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "4",
-    role: "【主帥】壓軸定海神針",
-    dishName: "古法樹子蒸鱸魚",
+    role: "【海鮮大菜】主菜",
+    dishName: "破布子蒸午仔魚",
     cuisine: "台菜",
     premadeLevel: "電鍋蒸熱",
     thawProfile: "fish",
@@ -39,16 +39,16 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "5",
-    role: "【溫潤後勤】功夫清湯肉",
+    role: "【中場過場湯】湯品",
     dishName: "清燉獅子頭",
     cuisine: "淮揚菜",
     premadeLevel: "瓦斯爐加熱",
     thawProfile: "meat",
-    cookingProfile: "reheat-braise",
+    cookingProfile: "reheat-soup",
   },
   {
     id: "6",
-    role: "【清口綠葉】素淨小菜",
+    role: "【季節時蔬】蔬菜",
     dishName: "上湯煨娃娃菜",
     cuisine: "粵菜",
     premadeLevel: "電鍋/微波加熱",
@@ -57,16 +57,16 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "7",
-    role: "【飽腹擔當】主食",
-    dishName: "廣式臘味糯米飯",
-    cuisine: "粵菜",
+    role: "【主食飯麵】主食",
+    dishName: "櫻花蝦油飯",
+    cuisine: "台菜",
     premadeLevel: "電鍋加熱",
     thawProfile: "other",
     cookingProfile: "reheat-rice",
   },
   {
     id: "8",
-    role: "【靈魂洗滌】壓軸大湯",
+    role: "【壓軸燉湯】湯品",
     dishName: "原盅蒜頭燉土雞湯",
     cuisine: "台菜",
     premadeLevel: "瓦斯爐加熱",
@@ -75,7 +75,7 @@ export const defaultMenu: MenuDish[] = [
   },
   {
     id: "9",
-    role: "【甜蜜餘韻】甜品",
+    role: "【中式甜品】甜品",
     dishName: "冰糖紫米紅豆湯",
     cuisine: "傳統中式",
     premadeLevel: "電鍋蒸熱",

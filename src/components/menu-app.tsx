@@ -302,7 +302,7 @@ export function MenuApp() {
               .join("｜")}
           />
           <StatCard
-            label="主帥結構"
+            label="宴席結構"
             value="八菜一湯"
             hint="保留湯、主食、甜品與兩道冷盤，維持整桌節奏。"
           />
