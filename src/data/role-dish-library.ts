@@ -255,6 +255,13 @@ export class UnsupportedTerminalEquipmentException extends PoolValidationExcepti
   }
 }
 
+export class InvalidPrepItemError extends PoolValidationException {
+  constructor(issues: string[]) {
+    super("候選菜觸發高預製攔截器，已阻止寫入 Pool。", issues);
+    this.name = "InvalidPrepItemError";
+  }
+}
+
 export class ConstraintViolationException extends Error {
   constructor(message: string) {
     super(message);
@@ -271,6 +278,14 @@ export const validatePoolOptionOrThrow = (option: RoleDishOption) => {
 
   if (issues.includes("unsupported_reheat_method")) {
     throw new UnsupportedTerminalEquipmentException(issues);
+  }
+
+  if (
+    issues.includes("leafy_green_interceptor") ||
+    issues.includes("fried_texture_interceptor") ||
+    issues.includes("prep_suitability_score_below_threshold")
+  ) {
+    throw new InvalidPrepItemError(issues);
   }
 
   throw new PoolValidationException("候選菜未通過 Pool 驗證，已阻止寫入。", issues);
@@ -315,6 +330,7 @@ export const getFinalMenuConstraintViolations = (dishes: MenuDish[]) => {
     }));
   const byFlag = hydrated.flatMap((dish) =>
     (dish.similarityFlags ?? [])
+      .filter((flag) => flag.type !== "low_diversity")
       .filter((flag) =>
         hydrated.some(
           (candidate) =>
@@ -430,11 +446,15 @@ export const buildPoolBuilderWarnings = (
           level: "yellow",
           role: currentRole,
           title:
-            flag.type === "cross_category_similarity_pair"
+            flag.type === "low_diversity"
+              ? "Yellow Warning：備選池同質性風險"
+              : flag.type === "cross_category_similarity_pair"
               ? "Yellow Warning：跨分類同質性風險"
               : "Yellow Warning：備選差異不足",
           description: `${option.dishName} 與 ${flag.counterpartRole} 的 ${flag.counterpartDishName} 已標記為 ${
-            flag.type === "cross_category_similarity_pair"
+            flag.type === "low_diversity"
+              ? "low_diversity"
+              : flag.type === "cross_category_similarity_pair"
               ? "cross_category_similarity_pair"
               : "high_similarity_pair"
           }。`,
@@ -495,6 +515,22 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "解凍即食",
       thawProfile: "meat",
       cookingProfile: "cold-serve",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "shaoxing-cold-trio",
+          counterpartDishName: "紹興醉蛋",
+          counterpartRole: "【迎賓冷盤一】迎賓冷盤",
+          recommendation: "三道紹興醉系冷盤可保留於 Pool，但建議補入非酒香路線冷盤，降低同群味型過度集中。",
+        },
+        {
+          type: "low_diversity",
+          pairKey: "shaoxing-cold-trio",
+          counterpartDishName: "紹興醉白蝦",
+          counterpartRole: "【迎賓冷盤二】迎賓冷盤",
+          recommendation: "三道紹興醉系冷盤可保留於 Pool，但建議補入非酒香路線冷盤，降低同群味型過度集中。",
+        },
+      ],
     },
     {
       libraryId: "left-cold-7",
@@ -522,6 +558,31 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "解凍即食",
       thawProfile: "other",
       cookingProfile: "cold-serve",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "shaoxing-cold-trio",
+          counterpartDishName: "紹興醉雞卷",
+          counterpartRole: "【迎賓冷盤一】迎賓冷盤",
+          recommendation: "三道紹興醉系冷盤可保留於 Pool，但建議補入非酒香路線冷盤，降低同群味型過度集中。",
+        },
+        {
+          type: "low_diversity",
+          pairKey: "shaoxing-cold-trio",
+          counterpartDishName: "紹興醉白蝦",
+          counterpartRole: "【迎賓冷盤二】迎賓冷盤",
+          recommendation: "三道紹興醉系冷盤可保留於 Pool，但建議補入非酒香路線冷盤，降低同群味型過度集中。",
+        },
+      ],
+    },
+    {
+      libraryId: "left-cold-10",
+      role: "【迎賓冷盤一】迎賓冷盤",
+      dishName: "川味泡椒鳳爪",
+      cuisine: "川菜",
+      premadeLevel: "解凍即食",
+      thawProfile: "other",
+      cookingProfile: "cold-serve",
     },
   ],
   "【迎賓冷盤二】迎賓冷盤": [
@@ -533,6 +594,22 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "解凍即食",
       thawProfile: "shrimp",
       cookingProfile: "cold-serve",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "shaoxing-cold-trio",
+          counterpartDishName: "紹興醉雞卷",
+          counterpartRole: "【迎賓冷盤一】迎賓冷盤",
+          recommendation: "三道紹興醉系冷盤可保留於 Pool，但建議補入非酒香路線冷盤，降低同群味型過度集中。",
+        },
+        {
+          type: "low_diversity",
+          pairKey: "shaoxing-cold-trio",
+          counterpartDishName: "紹興醉蛋",
+          counterpartRole: "【迎賓冷盤一】迎賓冷盤",
+          recommendation: "三道紹興醉系冷盤可保留於 Pool，但建議補入非酒香路線冷盤，降低同群味型過度集中。",
+        },
+      ],
     },
     {
       libraryId: "right-cold-2",
@@ -588,6 +665,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       thawProfile: "meat",
       cookingProfile: "cold-serve",
     },
+    {
+      libraryId: "right-cold-10",
+      role: "【迎賓冷盤二】迎賓冷盤",
+      dishName: "老北京芥末鴨掌",
+      cuisine: "京菜",
+      premadeLevel: "解凍即食",
+      thawProfile: "meat",
+      cookingProfile: "cold-serve",
+    },
   ],
   "【燒燴大菜】主菜": [
     {
@@ -598,6 +684,22 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "電鍋/瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "jiangnan-braised-trio",
+          counterpartDishName: "本幫紅燒肉",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "三道江南紅燒系厚菜可並存，但建議補入酸湯、蒸製或粉蒸等非醬油主導路線，平衡 Pool 的味型聚集。",
+        },
+        {
+          type: "low_diversity",
+          pairKey: "jiangnan-braised-trio",
+          counterpartDishName: "無錫排骨",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "三道江南紅燒系厚菜可並存，但建議補入酸湯、蒸製或粉蒸等非醬油主導路線，平衡 Pool 的味型聚集。",
+        },
+      ],
     },
     {
       libraryId: "vice-main-2",
@@ -614,6 +716,20 @@ export const roleDishLibrary: RoleDishLibrary = {
           counterpartDishName: "鎮江排骨",
           counterpartRole: "【燒燴大菜】主菜",
           recommendation: "兩道可並存於 Pool，但建議補入非甜酸收汁路線的大菜，稀釋江南排骨系備選的同質性。",
+        },
+        {
+          type: "low_diversity",
+          pairKey: "jiangnan-braised-trio",
+          counterpartDishName: "杭州東坡肉",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "三道江南紅燒系厚菜可並存，但建議補入酸湯、蒸製或粉蒸等非醬油主導路線，平衡 Pool 的味型聚集。",
+        },
+        {
+          type: "low_diversity",
+          pairKey: "jiangnan-braised-trio",
+          counterpartDishName: "本幫紅燒肉",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "三道江南紅燒系厚菜可並存，但建議補入酸湯、蒸製或粉蒸等非醬油主導路線，平衡 Pool 的味型聚集。",
         },
       ],
     },
@@ -720,7 +836,7 @@ export const roleDishLibrary: RoleDishLibrary = {
       libraryId: "vice-main-15",
       role: "【燒燴大菜】主菜",
       dishName: "紅燒牛臉頰肉",
-      cuisine: "台菜",
+      cuisine: "大眾中式",
       premadeLevel: "電鍋/瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
@@ -731,6 +847,40 @@ export const roleDishLibrary: RoleDishLibrary = {
       dishName: "本幫紅燒肉",
       cuisine: "本幫菜",
       premadeLevel: "電鍋/瓦斯爐加熱",
+      thawProfile: "meat",
+      cookingProfile: "reheat-braise",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "jiangnan-braised-trio",
+          counterpartDishName: "杭州東坡肉",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "三道江南紅燒系厚菜可並存，但建議補入酸湯、蒸製或粉蒸等非醬油主導路線，平衡 Pool 的味型聚集。",
+        },
+        {
+          type: "low_diversity",
+          pairKey: "jiangnan-braised-trio",
+          counterpartDishName: "無錫排骨",
+          counterpartRole: "【燒燴大菜】主菜",
+          recommendation: "三道江南紅燒系厚菜可並存，但建議補入酸湯、蒸製或粉蒸等非醬油主導路線，平衡 Pool 的味型聚集。",
+        },
+      ],
+    },
+    {
+      libraryId: "vice-main-17",
+      role: "【燒燴大菜】主菜",
+      dishName: "酸湯肥牛",
+      cuisine: "川菜",
+      premadeLevel: "瓦斯爐/微波加熱",
+      thawProfile: "meat",
+      cookingProfile: "reheat-soup",
+    },
+    {
+      libraryId: "vice-main-18",
+      role: "【燒燴大菜】主菜",
+      dishName: "客家粉蒸肉",
+      cuisine: "客家菜",
+      premadeLevel: "電鍋蒸熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
     },
@@ -842,6 +992,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       cuisine: "江浙菜",
       premadeLevel: "微波/瓦斯爐加熱",
       thawProfile: "other",
+      cookingProfile: "reheat-braise",
+    },
+    {
+      libraryId: "main-fish-17",
+      role: "【海鮮大菜】主菜",
+      dishName: "糟溜魚片",
+      cuisine: "魯菜",
+      premadeLevel: "微波/瓦斯爐加熱",
+      thawProfile: "fish",
       cookingProfile: "reheat-braise",
     },
   ],
@@ -966,6 +1125,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "reheat-veg",
       reheatMethods: ["MICROWAVE", "RICE_COOKER"],
     },
+    {
+      libraryId: "veg-14",
+      role: "【燴扒蔬蕈】蔬菜",
+      dishName: "魚香茄子煲",
+      cuisine: "川菜",
+      premadeLevel: "微波/瓦斯爐加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+    },
   ],
   "【主食飯麵】主食": [
     {
@@ -1032,15 +1200,6 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "reheat-rice",
     },
     {
-      libraryId: "staple-15",
-      role: "【主食飯麵】主食",
-      dishName: "上海菜飯",
-      cuisine: "本幫菜",
-      premadeLevel: "微波/電鍋加熱",
-      thawProfile: "other",
-      cookingProfile: "reheat-rice",
-    },
-    {
       libraryId: "staple-16",
       role: "【主食飯麵】主食",
       dishName: "揚州香蒜叉燒炒飯",
@@ -1055,6 +1214,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       dishName: "台式古早味高麗菜飯",
       cuisine: "台菜",
       premadeLevel: "微波/電鍋加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-18",
+      role: "【主食飯麵】主食",
+      dishName: "客家梅干扣肉包",
+      cuisine: "客家菜",
+      premadeLevel: "電鍋蒸熱",
       thawProfile: "other",
       cookingProfile: "reheat-rice",
     },
@@ -1129,7 +1297,7 @@ export const roleDishLibrary: RoleDishLibrary = {
       libraryId: "dessert-4",
       role: "【晏尾甜品】甜品",
       dishName: "冰糖燉雪梨",
-      cuisine: "大眾中式",
+      cuisine: "粵菜",
       premadeLevel: "電鍋熱食或冷飲",
       thawProfile: "other",
       cookingProfile: "steam-dessert",
@@ -1147,7 +1315,7 @@ export const roleDishLibrary: RoleDishLibrary = {
       libraryId: "dessert-6",
       role: "【晏尾甜品】甜品",
       dishName: "百合銀耳燉雪蛤",
-      cuisine: "大眾中式",
+      cuisine: "粵菜",
       premadeLevel: "電鍋熱食或冷飲",
       thawProfile: "other",
       cookingProfile: "steam-dessert",

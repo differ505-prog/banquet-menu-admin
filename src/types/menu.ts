@@ -19,7 +19,10 @@ export type ReheatMethod =
 
 export type SupportedPoolReheatMethod = Exclude<ReheatMethod, "OVEN" | "AIR_FRYER">;
 
-export type SimilarityFlagType = "high_similarity_pair" | "cross_category_similarity_pair";
+export type SimilarityFlagType =
+  | "high_similarity_pair"
+  | "cross_category_similarity_pair"
+  | "low_diversity";
 
 export type SimilarityFlag = {
   type: SimilarityFlagType;
