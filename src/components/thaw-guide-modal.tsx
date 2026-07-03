@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, Clipboard, CookingPot, Snowflake, X } from "lucide-react";
 
 import type { CookingGuide, CopyTarget, ThawGuide } from "@/types/menu";
@@ -36,19 +36,18 @@ export function ThawGuideModal({
     cookingGuides.find((guide) => guide.key === "air-fryer")?.key ?? cookingGuides[0]?.key ?? "fry";
   const [activeCookingGuideKey, setActiveCookingGuideKey] =
     useState<CookingGuide["key"]>(preferredCookingGuideKey);
+  const resolvedActiveCookingGuideKey = cookingGuides.some(
+    (guide) => guide.key === activeCookingGuideKey,
+  )
+    ? activeCookingGuideKey
+    : preferredCookingGuideKey;
   const activeCookingGuide =
-    cookingGuides.find((guide) => guide.key === activeCookingGuideKey) ?? cookingGuides[0] ?? null;
+    cookingGuides.find((guide) => guide.key === resolvedActiveCookingGuideKey) ?? cookingGuides[0] ?? null;
   const activeCookingGuideText = useMemo(
     () =>
       activeCookingGuide ? buildCookingGuideSectionText(activeCookingGuide.key) : cookingGuideText,
     [activeCookingGuide, cookingGuideText],
   );
-
-  useEffect(() => {
-    if (!cookingGuides.some((guide) => guide.key === activeCookingGuideKey)) {
-      setActiveCookingGuideKey(preferredCookingGuideKey);
-    }
-  }, [activeCookingGuideKey, cookingGuides, preferredCookingGuideKey]);
 
   if (!open) {
     return null;
@@ -179,7 +178,7 @@ export function ThawGuideModal({
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {cookingGuides.map((guide) => {
-                const active = guide.key === activeCookingGuideKey;
+                const active = guide.key === resolvedActiveCookingGuideKey;
 
                 return (
                   <button

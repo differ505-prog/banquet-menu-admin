@@ -96,14 +96,17 @@ const inferPrimaryIngredient = (dishName: string, role: string) => {
   if (/(海參|烏參|花膠)/.test(dishName)) return "sea_cucumber";
   if (/(豆腐|豆皮|腐竹|百葉|烤麩)/.test(dishName)) return "soy";
   if (/藕/.test(dishName)) return "lotus_root";
-  if (/(米飯|炒飯|菜飯|米糕|油飯|糯米|拌麵|炒麵|蘿蔔糕)/.test(dishName)) return "staple";
-  if (/(菇|雲耳|木耳|筍|娃娃菜|南瓜|冬瓜|蘿蔔|猴頭菇)/.test(dishName)) return "vegetable";
+  if (/(米飯|炒飯|菜飯|米糕|油飯|糯米|拌麵|炒麵|蘿蔔糕|粥)/.test(dishName)) return "staple";
+  if (/(菇|雲耳|木耳|海帶|筍|娃娃菜|南瓜|冬瓜|蘿蔔|猴頭菇|白果|栗子|芋頭|杏鮑菇)/.test(dishName)) {
+    return "vegetable";
+  }
   if (role.includes("甜品")) return "dessert";
   if (role.includes("主食")) return "staple";
   return "mixed";
 };
 
 const inferFlavorProfile = (dishName: string) => {
+  if (/(破布子|樹子)/.test(dishName)) return "tree_berry_umami";
   if (/(紅燒|柱侯|醬香|豉汁|豆豉)/.test(dishName)) return "soy_braised";
   if (/(蒜蓉|蒜頭)/.test(dishName)) return "garlic";
   if (/(五味|紅油|麻辣|剁椒|XO醬|黑椒|椒麻)/.test(dishName)) return "spiced_savory";
@@ -111,19 +114,14 @@ const inferFlavorProfile = (dishName: string) => {
   if (/(花雕|酒釀|醉)/.test(dishName)) return "wine_aroma";
   if (/(蟹黃|蟹粉|鮑汁|金湯)/.test(dishName)) return "rich_umami";
   if (/(桂花|冰糖)/.test(dishName)) return "sweet_aroma";
-  if (/(甜|糖醋|酸菜)/.test(dishName)) return "sweet_sour";
+  if (/(甜|糖醋|酸菜|梅汁)/.test(dishName)) return "sweet_sour";
   return "savory";
 };
 
-const inferLeafyGreen = (dishName: string, role: string) => {
-  if (role.includes("主食") && /(菜飯|炒飯|油飯|米糕|拌麵|炒麵|蘿蔔糕)/.test(dishName)) {
-    return false;
-  }
-
-  return /(娃娃菜|芥蘭|菠菜|青江菜|地瓜葉|空心菜|高麗菜|油菜|豆苗|刈菜)/.test(
+const inferLeafyGreen = (dishName: string) =>
+  /(雪菜|大白菜|高麗菜|芥蘭|菠菜|青江菜|地瓜葉|空心菜|油菜|豆苗|刈菜)/.test(
     dishName,
   );
-};
 
 const inferFreezeStableLeafyGreen = (dishName: string) =>
   /(娃娃菜)/.test(dishName);
@@ -179,7 +177,7 @@ export const enrichRoleDishOption = (option: RoleDishOption): RoleDishOption => 
           method === "AIR_FRYER",
       )
     : parseReheatMethods(option.premadeLevel);
-  const isLeafyGreen = option.isLeafyGreen ?? inferLeafyGreen(option.dishName, option.role);
+  const isLeafyGreen = option.isLeafyGreen ?? inferLeafyGreen(option.dishName);
   const freezeStableLeafyGreen =
     option.freezeStableLeafyGreen ?? inferFreezeStableLeafyGreen(option.dishName);
   const isFried = option.isFried ?? inferIsFried(option.dishName, option.premadeLevel);
@@ -499,6 +497,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "cold-serve",
     },
     {
+      libraryId: "left-cold-4",
+      role: "【迎賓冷盤一】迎賓冷盤",
+      dishName: "涼拌木耳海帶絲",
+      cuisine: "大眾中式",
+      premadeLevel: "解凍即食",
+      thawProfile: "other",
+      cookingProfile: "cold-serve",
+    },
+    {
       libraryId: "left-cold-5",
       role: "【迎賓冷盤一】迎賓冷盤",
       dishName: "糖燻甘蔗雞",
@@ -628,6 +635,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "解凍即食",
       thawProfile: "other",
       cookingProfile: "cold-serve",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "five-spice-cold-pair",
+          counterpartDishName: "五味九孔鮑",
+          counterpartRole: "【迎賓冷盤二】迎賓冷盤",
+          recommendation: "同為五味醬路線可保留於 Pool，但建議補入酸香、梅汁或素爽口冷盤，避免冷盤區集中在同一醬感。",
+        },
+      ],
     },
     {
       libraryId: "right-cold-6",
@@ -639,6 +655,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "cold-serve",
     },
     {
+      libraryId: "right-cold-3",
+      role: "【迎賓冷盤二】迎賓冷盤",
+      dishName: "冰鎮梅汁南瓜",
+      cuisine: "大眾中式",
+      premadeLevel: "解凍即食",
+      thawProfile: "other",
+      cookingProfile: "cold-serve",
+    },
+    {
       libraryId: "right-cold-7",
       role: "【迎賓冷盤二】迎賓冷盤",
       dishName: "五味九孔鮑",
@@ -646,6 +671,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "解凍即食",
       thawProfile: "other",
       cookingProfile: "cold-serve",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "five-spice-cold-pair",
+          counterpartDishName: "五味中卷",
+          counterpartRole: "【迎賓冷盤二】迎賓冷盤",
+          recommendation: "同為五味醬路線可保留於 Pool，但建議補入酸香、梅汁或素爽口冷盤，避免冷盤區集中在同一醬感。",
+        },
+      ],
     },
     {
       libraryId: "right-cold-8",
@@ -800,7 +834,7 @@ export const roleDishLibrary: RoleDishLibrary = {
       libraryId: "vice-main-10",
       role: "【燒燴大菜】主菜",
       dishName: "神仙八寶鴨",
-      cuisine: "魯菜",
+      cuisine: "本幫菜",
       premadeLevel: "電鍋蒸熱",
       thawProfile: "meat",
       cookingProfile: "reheat-braise",
@@ -921,6 +955,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "shrimp",
       cookingProfile: "reheat-braise",
+      similarityFlags: [
+        {
+          type: "high_similarity_pair",
+          pairKey: "dry-braise-shrimp-pair",
+          counterpartDishName: "酒釀乾燒大蝦",
+          counterpartRole: "【海鮮大菜】主菜",
+          recommendation: "兩道都屬乾燒蝦路線，Pool 可並存，但建議補入非乾燒或非酒香蝦料理，拉開海鮮主菜的味型層次。",
+        },
+      ],
     },
     {
       libraryId: "main-fish-8",
@@ -966,6 +1009,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "微波/瓦斯爐加熱",
       thawProfile: "shrimp",
       cookingProfile: "reheat-braise",
+      similarityFlags: [
+        {
+          type: "high_similarity_pair",
+          pairKey: "dry-braise-shrimp-pair",
+          counterpartDishName: "乾燒明蝦",
+          counterpartRole: "【海鮮大菜】主菜",
+          recommendation: "兩道都屬乾燒蝦路線，Pool 可並存，但建議補入非乾燒或非酒香蝦料理，拉開海鮮主菜的味型層次。",
+        },
+      ],
     },
     {
       libraryId: "main-fish-14",
@@ -984,6 +1036,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "電鍋/瓦斯爐加熱",
       thawProfile: "fish",
       cookingProfile: "steam-fish",
+      similarityFlags: [
+        {
+          type: "low_diversity",
+          pairKey: "tree-berry-steam-fish",
+          counterpartDishName: "破布子蒸午仔魚",
+          counterpartRole: "【海鮮大菜】主菜",
+          recommendation: "樹子與破布子應視為同一調味軸線，建議補入非樹子系蒸魚或非蒸製海鮮大菜，避免清蒸魚類內部仍集中同味型。",
+        },
+      ],
     },
     {
       libraryId: "main-fish-16",
@@ -1022,6 +1083,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-soup",
+      similarityFlags: [
+        {
+          type: "cross_category_similarity_pair",
+          pairKey: "pickled-bamboo-white-soup",
+          counterpartDishName: "老鴨扁尖筍濃湯",
+          counterpartRole: "【壓軸大湯】湯品",
+          recommendation: "兩道皆仰賴醃筍鮮味白湯，可跨分類保留，但建議至少補入一條非醃筍系的大湯路線，避免整體湯品層次過窄。",
+        },
+      ],
     },
     {
       libraryId: "soup-meat-3",
@@ -1080,15 +1150,6 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "reheat-veg",
     },
     {
-      libraryId: "veg-9",
-      role: "【燴扒蔬蕈】蔬菜",
-      dishName: "上湯雪菜百葉",
-      cuisine: "江浙菜",
-      premadeLevel: "微波/瓦斯爐加熱",
-      thawProfile: "other",
-      cookingProfile: "reheat-veg",
-    },
-    {
       libraryId: "veg-10",
       role: "【燴扒蔬蕈】蔬菜",
       dishName: "扁尖筍百葉燒毛豆",
@@ -1130,6 +1191,33 @@ export const roleDishLibrary: RoleDishLibrary = {
       role: "【燴扒蔬蕈】蔬菜",
       dishName: "魚香茄子煲",
       cuisine: "川菜",
+      premadeLevel: "微波/瓦斯爐加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+    },
+    {
+      libraryId: "veg-15",
+      role: "【燴扒蔬蕈】蔬菜",
+      dishName: "栗子燒白果",
+      cuisine: "大眾中式",
+      premadeLevel: "微波/電鍋加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+    },
+    {
+      libraryId: "veg-16",
+      role: "【燴扒蔬蕈】蔬菜",
+      dishName: "醬汁杏鮑菇",
+      cuisine: "大眾中式",
+      premadeLevel: "微波/瓦斯爐加熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-veg",
+    },
+    {
+      libraryId: "veg-17",
+      role: "【燴扒蔬蕈】蔬菜",
+      dishName: "蟹粉燴蹄筋",
+      cuisine: "江浙菜",
       premadeLevel: "微波/瓦斯爐加熱",
       thawProfile: "other",
       cookingProfile: "reheat-veg",
@@ -1209,20 +1297,29 @@ export const roleDishLibrary: RoleDishLibrary = {
       cookingProfile: "reheat-rice",
     },
     {
-      libraryId: "staple-17",
+      libraryId: "staple-18",
       role: "【主食飯麵】主食",
-      dishName: "台式古早味高麗菜飯",
+      dishName: "客家梅干扣肉包",
+      cuisine: "客家菜",
+      premadeLevel: "電鍋蒸熱",
+      thawProfile: "other",
+      cookingProfile: "reheat-rice",
+    },
+    {
+      libraryId: "staple-19",
+      role: "【主食飯麵】主食",
+      dishName: "蒲燒鯛魚米糕",
       cuisine: "台菜",
       premadeLevel: "微波/電鍋加熱",
       thawProfile: "other",
       cookingProfile: "reheat-rice",
     },
     {
-      libraryId: "staple-18",
+      libraryId: "staple-20",
       role: "【主食飯麵】主食",
-      dishName: "客家梅干扣肉包",
-      cuisine: "客家菜",
-      premadeLevel: "電鍋蒸熱",
+      dishName: "芋頭排骨粥",
+      cuisine: "台菜",
+      premadeLevel: "微波/電鍋加熱",
       thawProfile: "other",
       cookingProfile: "reheat-rice",
     },
@@ -1272,6 +1369,15 @@ export const roleDishLibrary: RoleDishLibrary = {
       premadeLevel: "瓦斯爐加熱",
       thawProfile: "meat",
       cookingProfile: "reheat-soup",
+      similarityFlags: [
+        {
+          type: "cross_category_similarity_pair",
+          pairKey: "pickled-bamboo-white-soup",
+          counterpartDishName: "砂鍋醃篤鮮",
+          counterpartRole: "【承啟中湯】湯品",
+          recommendation: "兩道皆仰賴醃筍鮮味白湯，可跨分類保留，但建議至少補入一條非醃筍系的大湯路線，避免整體湯品層次過窄。",
+        },
+      ],
     },
   ],
   "【晏尾甜品】甜品": [
@@ -1352,15 +1458,15 @@ export const createEmptyRoleDishOption = (role: string): RoleDishOption => ({
   dishName: "請輸入候選菜名",
   cuisine: "請輸入菜系",
   premadeLevel: "請輸入預製度",
-  prepSuitabilityScore: 3,
-  reheatMethods: ["MICROWAVE"],
-  primaryIngredient: "mixed",
-  flavorProfile: "savory",
-  isLeafyGreen: false,
-  isFried: false,
-  freezeStableLeafyGreen: false,
-  requiresCrispyTexture: false,
-  needsCrispiness: false,
+  prepSuitabilityScore: undefined,
+  reheatMethods: undefined,
+  primaryIngredient: undefined,
+  flavorProfile: undefined,
+  isLeafyGreen: undefined,
+  isFried: undefined,
+  freezeStableLeafyGreen: undefined,
+  requiresCrispyTexture: undefined,
+  needsCrispiness: undefined,
   similarityFlags: [],
   ...getRoleDefaultProfiles(role),
 });

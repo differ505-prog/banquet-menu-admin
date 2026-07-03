@@ -140,7 +140,7 @@ describe("menu utilities", () => {
     const matched = getMatchingLibraryOption(dish, getRoleDishOptions(dish.role));
 
     expect(matched?.dishName).toBe("五香醬牛腱");
-    expect(getRoleDishOptions(dish.role)).toHaveLength(9);
+    expect(getRoleDishOptions(dish.role)).toHaveLength(10);
   });
 
   it("counts how many dishes differ from the default menu", () => {
@@ -224,7 +224,7 @@ describe("menu utilities", () => {
     expect(restored["【承啟中湯】湯品"]?.[0]?.dishName).toBe("竹笙瑤柱海鮮羹");
     expect(restored["【承啟中湯】湯品"]?.[0]?.role).toBe("【承啟中湯】湯品");
     expect(restored["【承啟中湯】湯品"]?.[0]?.cookingProfile).toBe("reheat-soup");
-    expect(restored["【迎賓冷盤一】迎賓冷盤"]?.length).toBe(9);
+    expect(restored["【迎賓冷盤一】迎賓冷盤"]?.length).toBe(10);
   });
 
   it("adds, updates and removes role library options", () => {
@@ -248,11 +248,15 @@ describe("menu utilities", () => {
     const fishOption = getRoleDishOptions("【海鮮大菜】主菜").find(
       (option) => option.dishName === "豉汁蒸石斑魚",
     );
+    const shanghaiDuckOption = getRoleDishOptions("【燒燴大菜】主菜").find(
+      (option) => option.dishName === "神仙八寶鴨",
+    );
 
     expect(fishOption?.reheatMethods).toEqual(["RICE_COOKER"]);
     expect(fishOption?.primaryIngredient).toBe("fish");
     expect(fishOption?.flavorProfile).toBe("soy_braised");
     expect(fishOption?.prepSuitabilityScore).toBeGreaterThanOrEqual(3);
+    expect(shanghaiDuckOption?.cuisine).toBe("本幫菜");
 
     expect(
       getPoolValidationIssues({
@@ -273,6 +277,24 @@ describe("menu utilities", () => {
         "fried_texture_interceptor",
       ]),
     );
+
+    expect(
+      getPoolValidationIssues({
+        ...createEmptyRoleDishOption("【主食飯麵】主食"),
+        dishName: "台式古早味高麗菜飯",
+        cuisine: "台菜",
+        premadeLevel: "微波/電鍋加熱",
+      }),
+    ).toEqual(expect.arrayContaining(["leafy_green_interceptor"]));
+
+    expect(
+      getPoolValidationIssues({
+        ...createEmptyRoleDishOption("【燴扒蔬蕈】蔬菜"),
+        dishName: "上湯雪菜百葉",
+        cuisine: "江浙菜",
+        premadeLevel: "微波/瓦斯爐加熱",
+      }),
+    ).toEqual(expect.arrayContaining(["leafy_green_interceptor"]));
 
     expect(() =>
       validatePoolOptionOrThrow({
@@ -383,7 +405,11 @@ describe("menu utilities", () => {
     expect(prompt).toContain("嚴禁西式、日式、南洋等異國元素");
     expect(prompt).toContain("嚴禁需要烤箱、氣炸鍋");
     expect(prompt).toContain("綠色葉菜類");
-    expect(prompt).toContain("包含切碎混入菜飯、炒飯、配菜中的做法");
+    expect(prompt).toContain("切碎混入主食或藏在傳統做法中");
+    expect(prompt).toContain("LLM 必須主動拆解菜名與常識食譜中的隱含食材");
+    expect(prompt).toContain("結球葉菜（如高麗菜、大白菜）");
+    expect(prompt).toContain("十字花科綠色葉菜（如青江菜、雪菜）");
+    expect(prompt).toContain("不可妥協");
     expect(prompt).toContain("菜系標註原則");
     expect(prompt).toContain("核心食材 + 烹調法 + 味型");
     expect(prompt).toContain("硬性重複（Hard Duplicate）");
@@ -410,6 +436,8 @@ describe("menu utilities", () => {
     expect(prompt).toContain("豉汁蒸石斑魚");
     expect(prompt).toContain("糖燻甘蔗雞");
     expect(prompt).toContain("酒釀乾燒大蝦");
+    expect(prompt).toContain("涼拌木耳海帶絲");
+    expect(prompt).toContain("冰鎮梅汁南瓜");
     expect(prompt).toContain("桂花冰糖糯米藕");
     expect(prompt).toContain("紹興醉蛋");
     expect(prompt).toContain("白切雞");
@@ -422,9 +450,13 @@ describe("menu utilities", () => {
     expect(prompt).toContain("客家粉蒸肉");
     expect(prompt).toContain("糟溜魚片");
     expect(prompt).toContain("魚香茄子煲");
+    expect(prompt).toContain("栗子燒白果");
+    expect(prompt).toContain("醬汁杏鮑菇");
+    expect(prompt).toContain("蟹粉燴蹄筋");
     expect(prompt).toContain("客家梅干扣肉包");
     expect(prompt).toContain("揚州香蒜叉燒炒飯");
-    expect(prompt).toContain("台式古早味高麗菜飯");
+    expect(prompt).toContain("蒲燒鯛魚米糕");
+    expect(prompt).toContain("芋頭排骨粥");
     expect(prompt).toContain("栗子燒黃燜雞");
     expect(prompt).toContain("百合銀耳燉雪蛤");
     expect(prompt).toContain("鎮江排骨");
@@ -454,10 +486,14 @@ describe("menu utilities", () => {
     expect(exportJson).toContain("白果烤麩");
     expect(exportJson).toContain("麻油猴頭菇");
     expect(exportJson).toContain("魚香茄子煲");
+    expect(exportJson).toContain("栗子燒白果");
+    expect(exportJson).toContain("醬汁杏鮑菇");
+    expect(exportJson).toContain("蟹粉燴蹄筋");
     expect(exportJson).toContain("上海蔥油拌麵");
     expect(exportJson).toContain("XO醬海鮮炒飯");
     expect(exportJson).toContain("揚州香蒜叉燒炒飯");
-    expect(exportJson).toContain("台式古早味高麗菜飯");
+    expect(exportJson).toContain("蒲燒鯛魚米糕");
+    expect(exportJson).toContain("芋頭排骨粥");
     expect(exportJson).toContain("客家梅干扣肉包");
     expect(exportJson).toContain("雞湯煨雙冬");
     expect(exportJson).toContain("糟溜魚片");
@@ -474,6 +510,8 @@ describe("menu utilities", () => {
     expect(exportJson).toContain("紅桂花酒釀圓子");
     expect(exportJson).toContain("五味中卷");
     expect(exportJson).toContain("紅油拌腐竹");
+    expect(exportJson).toContain("涼拌木耳海帶絲");
+    expect(exportJson).toContain("冰鎮梅汁南瓜");
     expect(exportJson).toContain("\"老醋陳皮拌雲耳\"");
     expect(exportJson).toContain("\"role\": \"【燴扒蔬蕈】蔬菜\"");
     expect(exportJson).toContain("粵菜");
@@ -496,6 +534,8 @@ describe("menu utilities", () => {
     expect(exportJson).not.toContain("上海菜飯");
     expect(exportJson).not.toContain("豆豉清蒸石斑魚");
     expect(exportJson).not.toContain("上湯煨娃娃菜");
+    expect(exportJson).not.toContain("上湯雪菜百葉");
+    expect(exportJson).not.toContain("台式古早味高麗菜飯");
   });
 
   it("invalidates persisted workspace when default data version changes", () => {
