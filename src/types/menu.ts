@@ -78,7 +78,8 @@ export type CopyTarget =
   | "cookingGuide"
   | "cookingReminder"
   | "culinaryGuide"
-  | "culinarySkill";
+  | "culinarySkill"
+  | "daxiGuide";
 
 export type MenuDish = DishMetadata & {
   id: string;

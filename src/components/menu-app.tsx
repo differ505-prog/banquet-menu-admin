@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
-import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, Sparkles, Utensils } from "lucide-react";
+import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, ShoppingBag, Sparkles, Utensils } from "lucide-react";
 
 import { defaultMenu } from "@/data/default-menu";
 import {
@@ -17,10 +17,15 @@ import { OutputPanel } from "@/components/output-panel";
 import { StatCard } from "@/components/stat-card";
 import { ThawGuideModal } from "@/components/thaw-guide-modal";
 import { CulinaryGuideModal } from "@/components/culinary-guide-modal";
+import { DaxiHarborGuideModal } from "@/components/daxi-harbor-guide-modal";
 import {
   culinaryTechniques,
   culinarySkillRecommendations,
 } from "@/data/culinary-techniques";
+import {
+  daxiGoldenList,
+  daxiSkipList,
+} from "@/data/daxi-harbor-guide";
 import type { CopyTarget } from "@/types/menu";
 import {
   buildCookingGuideText,
@@ -69,6 +74,7 @@ export function MenuApp() {
   const [isGuestPreviewOpen, setIsGuestPreviewOpen] = useState(false);
   const [isThawGuideOpen, setIsThawGuideOpen] = useState(false);
   const [isCulinaryGuideOpen, setIsCulinaryGuideOpen] = useState(false);
+  const [isDaxiGuideOpen, setIsDaxiGuideOpen] = useState(false);
   const [libraryState, setLibraryState] = useState(() => {
     const fallback = createDefaultLibraryState();
 
@@ -260,6 +266,14 @@ export function MenuApp() {
               </button>
               <button
                 type="button"
+                onClick={() => setIsDaxiGuideOpen(true)}
+                className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                大溪漁港採購指南
+              </button>
+              <button
+                type="button"
                 onClick={() => setIsThawGuideOpen(true)}
                 className="btn-accent inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
               >
@@ -428,6 +442,14 @@ export function MenuApp() {
               </button>
               <button
                 type="button"
+                onClick={() => setIsDaxiGuideOpen(true)}
+                className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                大溪漁港採購指南
+              </button>
+              <button
+                type="button"
                 onClick={() => setIsThawGuideOpen(true)}
                 className="btn-accent inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
               >
@@ -562,6 +584,15 @@ export function MenuApp() {
         skillRecommendations={culinarySkillRecommendations}
         open={isCulinaryGuideOpen}
         onClose={() => setIsCulinaryGuideOpen(false)}
+        onCopy={copyText}
+        copiedTarget={copiedTarget}
+      />
+
+      <DaxiHarborGuideModal
+        goldenList={daxiGoldenList}
+        skipList={daxiSkipList}
+        open={isDaxiGuideOpen}
+        onClose={() => setIsDaxiGuideOpen(false)}
         onCopy={copyText}
         copiedTarget={copiedTarget}
       />
