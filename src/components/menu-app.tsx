@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
-import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, Sparkles } from "lucide-react";
+import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, Sparkles, Utensils } from "lucide-react";
 
 import { defaultMenu } from "@/data/default-menu";
 import {
@@ -16,6 +16,11 @@ import { LibraryManager } from "@/components/library-manager";
 import { OutputPanel } from "@/components/output-panel";
 import { StatCard } from "@/components/stat-card";
 import { ThawGuideModal } from "@/components/thaw-guide-modal";
+import { CulinaryGuideModal } from "@/components/culinary-guide-modal";
+import {
+  culinaryTechniques,
+  culinarySkillRecommendations,
+} from "@/data/culinary-techniques";
 import type { CopyTarget } from "@/types/menu";
 import {
   buildCookingGuideText,
@@ -63,6 +68,7 @@ export function MenuApp() {
   const [isOutputOpen, setIsOutputOpen] = useState(false);
   const [isGuestPreviewOpen, setIsGuestPreviewOpen] = useState(false);
   const [isThawGuideOpen, setIsThawGuideOpen] = useState(false);
+  const [isCulinaryGuideOpen, setIsCulinaryGuideOpen] = useState(false);
   const [libraryState, setLibraryState] = useState(() => {
     const fallback = createDefaultLibraryState();
 
@@ -246,6 +252,14 @@ export function MenuApp() {
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="button"
+                onClick={() => setIsCulinaryGuideOpen(true)}
+                className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
+              >
+                <Utensils className="h-4 w-4" />
+                職人技術修煉手冊
+              </button>
+              <button
+                type="button"
                 onClick={() => setIsThawGuideOpen(true)}
                 className="btn-accent inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
               >
@@ -406,6 +420,14 @@ export function MenuApp() {
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
+                onClick={() => setIsCulinaryGuideOpen(true)}
+                className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
+              >
+                <Utensils className="h-4 w-4" />
+                職人技術修煉手冊
+              </button>
+              <button
+                type="button"
                 onClick={() => setIsThawGuideOpen(true)}
                 className="btn-accent inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
               >
@@ -533,6 +555,15 @@ export function MenuApp() {
         guideText={thawGuideText}
         cookingGuideText={cookingGuideText}
         cookingSummary={cookingSummary}
+      />
+
+      <CulinaryGuideModal
+        sections={culinaryTechniques}
+        skillRecommendations={culinarySkillRecommendations}
+        open={isCulinaryGuideOpen}
+        onClose={() => setIsCulinaryGuideOpen(false)}
+        onCopy={copyText}
+        copiedTarget={copiedTarget}
       />
     </main>
   );
