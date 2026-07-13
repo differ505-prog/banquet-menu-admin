@@ -210,6 +210,32 @@ grep -rEho "@media \(min-width|max-width: [0-9]+px\)" src/ | sort | uniq -c | so
 
 ---
 
+## 【 Agent 協作紀律】
+
+### 第十七條 — 先讀圖再回應（Visual-First Rule）
+
+若用戶主動附上截圖或圖片，**必須先閱讀圖片內容**，再基於視覺資訊回應。嚴禁在未讀圖的情況下長篇描述解決方案。
+
+驗證：用戶發圖後，Agent 第一次回應必須能準確引用圖中可見的 UI 元素、文字或狀態。
+
+### 第十八條 — 封閉式提問一次為限（Once-and-Wait Rule）
+
+Agent 發出封閉式決策問題（如「你想要 A 還是 B」）後，**必須等待用戶回答**，不得在同一次回應中重複發問。
+
+違反行為模式：「你想要哪種？」（等待）「好我假設你選 A」（實際上用戶可能選 B）。
+
+### 第十九條 — 新增 Public Type 前先查現有導出（Type Conflict Prevention）
+
+新增任何 public-facing TypeScript 型別（如 `CopyTarget`、`DishFilter`）前，先確認 `src/types/` 目錄中是否已存在相同名稱或相似職能的型別。
+
+驗證命令：
+```bash
+grep -rn "export type\|export interface" src/types/
+```
+若已存在，優先擴展既有型別，禁止在同一專案內建立功能重疊的同名型別。
+
+---
+
 ## 【跨專案可移植性邊界】
 
 本憲法包含專案特定的內容（色票、字體變數、功能模組名）。任何遷移或複用必須遵守：
