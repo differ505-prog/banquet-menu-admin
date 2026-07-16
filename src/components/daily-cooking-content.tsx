@@ -1,180 +1,198 @@
 "use client";
 
-import { Heart, Sparkles, Leaf, Shield, Brain, Moon, UtensilsCrossed } from "lucide-react";
-import type { CuisineType } from "@/types/menu";
+import { useState } from "react";
+import { Heart, BookOpen, ChevronDown, Check } from "lucide-react";
 
-interface DailyCookingContentProps {
-  activeCuisine: CuisineType;
-}
+import {
+  healthCookingSections,
+  healthCookingDifficultyLevels,
+  type HealthCookingDifficulty,
+  type HealthCookingSection,
+  type HealthCookingEntry,
+} from "@/data/health-cooking";
 
-const dailyContent: Record<CuisineType, {
-  title: string;
-  description: string;
-  categories: Array<{
-    key: string;
-    label: string;
-    icon: React.ReactNode;
-    items: string[];
-  }>;
-}> = {
-  chinese: {
-    title: "日養自煮 · 中式",
-    description: "依體質、時節、功效分類的日常養生食譜，幫助你在家輕鬆實踐食療之道。",
-    categories: [
-      {
-        key: "constitution",
-        label: "依體質",
-        icon: <Shield className="h-4 w-4" aria-hidden="true" />,
-        items: ["氣虛體質", "血虛體質", "陰虛體質", "陽虛體質", "痰濕體質", "濕熱體質"],
-      },
-      {
-        key: "season",
-        label: "依時節",
-        icon: <Leaf className="h-4 w-4" aria-hidden="true" />,
-        items: ["春季養肝", "夏季清熱", "秋季潤燥", "冬季溫補"],
-      },
-      {
-        key: "efficacy",
-        label: "依功效",
-        icon: <Heart className="h-4 w-4" aria-hidden="true" />,
-        items: ["護眼明目", "補鐵活血", "健脾養胃", "潤肺止咳", "安神助眠", "增強免疫"],
-      },
-    ],
-  },
-  japanese: {
-    title: "日養自煮 · 日式",
-    description: "融合和食智慧與現代營養學的日式家常料理，以天然發酵與鮮味萃取為核心。",
-    categories: [
-      {
-        key: "miso",
-        label: "味噌系列",
-        icon: <Sparkles className="h-4 w-4" aria-hidden="true" />,
-        items: ["味噌湯底黃金比例", "豆乳味噌鍋", "味噌銀鱈西京燒"],
-      },
-      {
-        key: "dashi",
-        label: "出汁系列",
-        icon: <Leaf className="h-4 w-4" aria-hidden="true" />,
-        items: ["昆布柴魚高湯", "日式茶碗蒸", "親子丼"],
-      },
-      {
-        key: "pickle",
-        label: "醃漬發酵",
-        icon: <Shield className="h-4 w-4" aria-hidden="true" />,
-        items: ["米糠醬菜", "淺漬小黃瓜", "自製鹽麴"],
-      },
-    ],
-  },
-  korean: {
-    title: "日養自煮 · 韓式",
-    description: "韓式發酵智慧與藥食同源的傳統飲食文化，日常餐桌上的元氣來源。",
-    categories: [
-      {
-        key: "ferment",
-        label: "發酵系列",
-        icon: <Sparkles className="h-4 w-4" aria-hidden="true" />,
-        items: ["辛奇（泡菜）", "大醬湯底", "辣椒醬料理"],
-      },
-      {
-        key: "herbs",
-        label: "藥食同源",
-        icon: <Heart className="h-4 w-4" aria-hidden="true" />,
-        items: ["人參雞湯", "蔘雞湯", "艾草煎餅"],
-      },
-      {
-        key: "bbq",
-        label: "烤肉家常",
-        icon: <Shield className="h-4 w-4" aria-hidden="true" />,
-        items: ["醬醃五花肉", "烤牛肉", "部隊鍋"],
-      },
-    ],
-  },
-  western: {
-    title: "日養自煮 · 西式",
-    description: "地中海飲食精神與法式料理技法，打造健康與優雅兼具的日常餐桌。",
-    categories: [
-      {
-        key: "mediterranean",
-        label: "地中海飲食",
-        icon: <Leaf className="h-4 w-4" aria-hidden="true" />,
-        items: ["橄欖油料理", "新鮮沙拉", "香草烤魚"],
-      },
-      {
-        key: "french",
-        label: "法式家常",
-        icon: <Sparkles className="h-4 w-4" aria-hidden="true" />,
-        items: ["洋蔥湯", "紅酒燉牛肉", "普羅旺斯燉菜"],
-      },
-      {
-        key: "comfort",
-        label: "療癒 comfort food",
-        icon: <Moon className="h-4 w-4" aria-hidden="true" />,
-        items: ["奶油白醬義大利麵", "焗烤馬鈴薯", "法式吐司"],
-      },
-    ],
-  },
+const difficultyColors: Record<HealthCookingDifficulty, string> = {
+  entry: "text-[color:var(--accent)]",
+  intermediate: "text-[color:var(--accent-warm)]",
+  master: "text-[color:var(--accent-cool)]",
 };
 
-export function DailyCookingContent({ activeCuisine }: DailyCookingContentProps) {
-  const content = dailyContent[activeCuisine];
+const difficultyBgColors: Record<HealthCookingDifficulty, string> = {
+  entry: "bg-[color:var(--accent)]/10 border-[color:var(--accent)]/25",
+  intermediate: "bg-[color:var(--accent-warm)]/10 border-[color:var(--accent-warm)]/25",
+  master: "bg-[color:var(--accent-cool)]/10 border-[color:var(--accent-cool)]/25",
+};
+
+function getDifficulty(entry: HealthCookingEntry): HealthCookingDifficulty {
+  const entryLabel = entry.label;
+  for (const level of healthCookingDifficultyLevels) {
+    if (level.dishes.some((d) => entryLabel.includes(d) || d.includes(entryLabel))) {
+      return level.level;
+    }
+  }
+  return "entry";
+}
+
+function EntryCard({ entry }: { entry: HealthCookingEntry }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const difficulty = getDifficulty(entry);
 
   return (
+    <div
+      className={`rounded-2xl border p-4 transition-all ${difficultyBgColors[difficulty]}`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h4 className="text-sm font-medium text-[color:var(--foreground)]">
+              {entry.label}
+            </h4>
+            <span className="rounded-full border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-2 py-0.5 text-[10px] text-[color:var(--muted)]">
+              {entry.cuisine}
+            </span>
+          </div>
+          <p className="mt-1.5 text-xs leading-6 text-[color:var(--muted)]">
+            {entry.coreTechnique}
+          </p>
+          {entry.goldenRatio && (
+            <p className="mt-1.5 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)] px-3 py-1.5 text-xs text-[color:var(--accent)]">
+              {entry.goldenRatio}
+            </p>
+          )}
+          {entry.healthNote && (
+            <p className="mt-1.5 text-xs leading-5 text-[color:var(--muted)]">
+              {entry.healthNote}
+            </p>
+          )}
+        </div>
+        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-medium ${difficultyBgColors[difficulty]} ${difficultyColors[difficulty]}`}>
+          {healthCookingDifficultyLevels.find((l) => l.level === difficulty)?.label}
+        </span>
+      </div>
+
+      {entry.steps && (
+        <>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="mt-3 flex items-center gap-1.5 text-[11px] text-[color:var(--muted)] transition-colors hover:text-[color:var(--foreground)]"
+          >
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+            />
+            {isExpanded ? "收起步驟" : "展開職人步驟"}
+          </button>
+          {isExpanded && (
+            <div className="mt-3 space-y-2">
+              {entry.steps.split("\n").map((step, i) => (
+                <div key={i} className="flex gap-2.5">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--accent)]" />
+                  <p className="text-xs leading-6 text-[color:var(--muted)]">{step}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {entry.troubleshooting && (
+        <div className="mt-3 rounded-xl border border-[color:var(--accent-warm)]/20 bg-[color:var(--accent-warm)]/8 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-[color:var(--accent-warm)]">
+            Troubleshooting
+          </p>
+          <p className="mt-1 text-xs font-medium text-[color:var(--foreground)]">
+            {entry.troubleshooting.problem}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
+            {entry.troubleshooting.solution}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CategorySection({ section }: { section: HealthCookingSection }) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  return (
+    <div className="rounded-[24px] border border-[color:var(--line)] bg-[color:var(--surface)] p-6 backdrop-blur-xl">
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex w-full items-start justify-between gap-4 text-left"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{section.emoji}</span>
+          <div>
+            <h3 className="text-lg font-medium text-[color:var(--foreground)]">
+              {section.label}
+            </h3>
+            <p className="mt-0.5 text-xs text-[color:var(--muted)]">
+              {section.coreTech}
+            </p>
+          </div>
+        </div>
+        <ChevronDown
+          className={`mt-1 h-4 w-4 shrink-0 text-[color:var(--muted)] transition-transform ${isExpanded ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {isExpanded && (
+        <>
+          <p className="mt-3 text-xs leading-6 text-[color:var(--muted)] italic">
+            {section.principle}
+          </p>
+          <div className="mt-5 space-y-3">
+            {section.entries.map((entry, index) => (
+              <EntryCard key={index} entry={entry} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export function DailyCookingContent() {
+  return (
     <div className="space-y-8">
+      {/* Header */}
       <div className="text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/10 px-4 py-2 text-xs uppercase tracking-[0.32em] text-[color:var(--accent-strong)]">
           <Heart className="h-4 w-4" />
-          日養自煮
+          健康自煮
         </div>
         <h2 className="serif-title mt-4 text-3xl font-semibold tracking-tight text-[color:var(--foreground)]">
-          {content.title}
+          精準調味，職人比例
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[color:var(--muted)]">
-          {content.description}
+          正統性・健康度・廚藝價值。每一道都是經典技術的練習教材，拒絕替代品，只給你真正值得做的菜。
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {content.categories.map((category) => (
+      {/* Difficulty Levels Summary */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        {healthCookingDifficultyLevels.map((level) => (
           <div
-            key={category.key}
-            className="rounded-[24px] border border-[color:var(--line)] bg-[color:var(--surface)] p-6 backdrop-blur-xl"
+            key={level.level}
+            className={`rounded-2xl border p-4 ${difficultyBgColors[level.level]}`}
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color:var(--accent)]/25 bg-[color:var(--accent)]/15 text-[color:var(--accent)]">
-                {category.icon}
-              </div>
-              <h3 className="text-lg font-medium text-[color:var(--foreground)]">
-                {category.label}
-              </h3>
-            </div>
-            <ul className="mt-4 space-y-2">
-              {category.items.map((item, index) => (
-                <li
-                  key={index}
-                  className="flex items-center gap-2 text-sm text-[color:var(--muted)]"
-                >
-                  <span className="h-1 w-1 rounded-full bg-[color:var(--accent)]" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <p className={`text-[10px] uppercase tracking-wider ${difficultyColors[level.level]}`}>
+              {level.label}
+            </p>
+            <p className="mt-1 text-sm font-medium text-[color:var(--foreground)]">
+              {level.dishes.join(" · ")}
+            </p>
           </div>
         ))}
       </div>
 
-      <div className="rounded-[24px] border border-dashed border-[color:var(--line-strong)] bg-[color:var(--surface-soft)] p-8 text-center">
-        <div className="mx-auto max-w-md">
-          <Brain className="mx-auto h-10 w-10 text-[color:var(--muted)]" aria-hidden="true" />
-          <p className="mt-4 text-sm font-medium text-[color:var(--foreground)]">
-            內容持續擴充中
-          </p>
-          <p className="mt-2 text-xs leading-6 text-[color:var(--muted)]">
-            {activeCuisine === "chinese" && "中式養生內容最為豐富，依四季輪替、二十四節氣提供相應食譜推薦。"}
-            {activeCuisine === "japanese" && "和食系列結合出汁、發酵與旬味概念，以天然鮮味打造健康餐桌。"}
-            {activeCuisine === "korean" && "韓式藥食同源傳統，持續收錄宮廷料理與家常版本的養生食譜。"}
-            {activeCuisine === "western" && "地中海飲食金字塔為核心，收錄各國經典家常料理的健康版本。"}
-          </p>
-        </div>
+      {/* Category Sections */}
+      <div className="space-y-5">
+        {healthCookingSections.map((section) => (
+          <CategorySection key={section.key} section={section} />
+        ))}
       </div>
     </div>
   );

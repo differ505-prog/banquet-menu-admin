@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
-import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, Sparkles, Utensils } from "lucide-react";
+import { Eye, PanelRightOpen, RefreshCcw, Sparkles } from "lucide-react";
 
 import { defaultMenu } from "@/data/default-menu";
 import {
@@ -22,7 +22,7 @@ import {
   daxiGoldenList,
   daxiSkipList,
 } from "@/data/daxi-harbor-guide";
-import type { CopyTarget, MainTabKey, CuisineType } from "@/types/menu";
+import type { CopyTarget, MainTabKey } from "@/types/menu";
 import {
   buildCookingGuideText,
   buildCookingReminderText,
@@ -55,7 +55,6 @@ import {
   updateRoleDishOption,
 } from "@/utils/menu";
 import { MainTab } from "@/components/main-tab";
-import { CuisineSubTab } from "@/components/cuisine-sub-tab";
 import { DailyCookingContent } from "@/components/daily-cooking-content";
 import { BanquetContent } from "@/components/banquet-content";
 import { KnowledgeToolsContent } from "@/components/knowledge-tools-content";
@@ -68,9 +67,6 @@ const CURRENT_STORAGE_VERSION = buildStorageVersion(defaultMenu, createDefaultLi
 
 export function MenuApp() {
   const [state, dispatch] = useReducer(menuReducer, defaultMenu, initialMenuState);
-  const [cuisineFilter, setCuisineFilter] = useState("");
-  const [premadeFilter, setPremadeFilter] = useState("");
-  const [keyword, setKeyword] = useState("");
   const [copiedTarget, setCopiedTarget] = useState<CopyTarget | null>(null);
   const [hasHydrated, setHasHydrated] = useState(false);
   const [isOutputOpen, setIsOutputOpen] = useState(false);
@@ -100,7 +96,6 @@ export function MenuApp() {
   const roleOrder = defaultMenu.map((dish) => dish.role);
 
   const [activeTab, setActiveTab] = useState<MainTabKey>("banquet");
-  const [activeCuisine, setActiveCuisine] = useState<CuisineType>("chinese");
 
   useEffect(() => {
     try {
@@ -238,119 +233,54 @@ export function MenuApp() {
 
   return (
     <main className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      {/* Brand Header */}
       <section className="overflow-hidden rounded-[36px] border border-[color:var(--line)] bg-[radial-gradient(circle_at_top_left,rgba(160,186,176,0.22),transparent_28%),radial-gradient(circle_at_85%_0%,rgba(211,190,176,0.18),transparent_24%),linear-gradient(135deg,rgba(15,24,33,0.96),rgba(9,15,22,0.95))] p-6 shadow-[0_30px_100px_rgba(2,12,20,0.42)] sm:p-8">
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-          <div>
+        <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
+          <div className="flex-1">
             <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/10 px-4 py-2 text-xs uppercase tracking-[0.32em] text-[color:var(--accent-strong)]">
               <Sparkles className="h-4 w-4" />
-              私宴菜單編排系統
+              我的烹飪手冊
             </div>
-            <h1 className="serif-title mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-[color:var(--foreground)] sm:text-5xl">
-              以宴席地位為骨架，組裝一份優雅、體面、從容上桌的私宴菜單。
+            <h1 className="serif-title mt-6 max-w-2xl text-4xl font-semibold tracking-tight text-[color:var(--foreground)] sm:text-5xl">
+              為任何烹飪，前置什麼料、懂什麼技法。
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-8 text-[color:var(--muted)]">
-              主畫面只保留你真正需要的編排工作區。工作輸出與賓客版菜單都收進獨立面板，需要時再打開。
+            <p className="mt-4 max-w-xl text-sm leading-8 text-[color:var(--muted)]">
+              三個入口：宴客備什麼菜、日常備什麼菜、備菜前要懂什麼技法。選擇你的需求，系統為你整理好一切。
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setIsGuestPreviewOpen(true)}
-                className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <Eye className="h-4 w-4" />
-                預覽賓客版菜單
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsOutputOpen(true)}
-                className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <PanelRightOpen className="h-4 w-4" />
-                打開工作輸出
-              </button>
-            </div>
           </div>
 
-          <div className="rounded-[30px] border border-[color:var(--line)] bg-[color:var(--surface-soft)] p-5 backdrop-blur-xl">
-            <p className="text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">當前宴席輪廓</p>
-            <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
-              <p className="flex items-center justify-between rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-4 py-3">
-                <span>菜單總道數</span>
-                <span className="font-semibold text-[color:var(--foreground)]">{state.dishes.length} 道</span>
-              </p>
-              <p className="flex items-center justify-between rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-4 py-3">
-                <span>已調整模組</span>
-                <span className="font-semibold text-[color:var(--foreground)]">{changedDishCount} 道</span>
-              </p>
-              <p className="flex items-center justify-between rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-4 py-3">
-                <span>可快速完成品項</span>
-                <span className="font-semibold text-[color:var(--foreground)]">{getPremadeReadyCount(state.dishes)} 道</span>
-              </p>
-              <p className="flex items-center justify-between rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-4 py-3">
-                <span>目前菜庫候選</span>
-                <span className="font-semibold text-[color:var(--foreground)]">{roleLibraryCount} 筆</span>
-              </p>
-            </div>
-            <p className="mt-4 rounded-2xl border border-[color:var(--accent)]/20 bg-[color:var(--accent)]/10 px-4 py-3 text-xs leading-6 text-[color:var(--foreground)]">
-              已啟用本機自動保存；若系統偵測到預設菜單或候選菜庫版本更新，會自動清除舊快取並套用新版資料。
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => dispatch({ type: "reset", payload: defaultMenu })}
-                className="btn-muted inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm transition"
-              >
-                <RefreshCcw className="h-4 w-4" />
-                回復預設菜單
-              </button>
-              <span className="inline-flex items-center rounded-full border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-4 py-2.5 text-xs text-[color:var(--muted)]">
-                賓客視角不會看到候選菜、預製度或工作輸出資訊
-              </span>
-            </div>
+          <div className="flex shrink-0 flex-wrap justify-center gap-3 sm:flex-nowrap">
+            <button
+              type="button"
+              onClick={() => setIsGuestPreviewOpen(true)}
+              className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
+            >
+              <Eye className="h-4 w-4" />
+              預覽賓客版
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsOutputOpen(true)}
+              className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
+            >
+              <PanelRightOpen className="h-4 w-4" />
+              工作輸出
+            </button>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label="菜系分布"
-            value={`${Object.keys(cuisineDistribution).length} 系`}
-            hint={Object.entries(cuisineDistribution)
-              .map(([name, count]) => `${name}${count}`)
-              .join("｜")}
-          />
-          <StatCard
-            label="宴席結構"
-            value="八菜一湯"
-            hint="保留湯、主食、甜品與兩道冷盤，維持整桌節奏。"
-          />
-          <StatCard
-            label="調整進度"
-            value={`${changedDishCount} 道`}
-            hint="以預設菜單為基準，計算目前已替換或微調的模組數量。"
-          />
-          <StatCard
-            label="操作模式"
-            value="同位換菜"
-            hint={`內建 ${roleLibraryCount} 筆同地位候選菜，選取後即時同步輸出。`}
-          />
+        {/* Tab Navigation */}
+        <div className="mt-8">
+          <MainTab activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </section>
 
+      {/* Tab Content */}
       <section className="space-y-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <MainTab activeTab={activeTab} onTabChange={setActiveTab} />
-          {activeTab === "banquet" && (
-            <CuisineSubTab activeCuisine={activeCuisine} onCuisineChange={setActiveCuisine} />
-          )}
-        </div>
-
         {activeTab === "banquet" ? (
           <BanquetContent
             dishes={state.dishes}
             libraryState={libraryState}
-            cuisineFilter={cuisineFilter}
-            premadeFilter={premadeFilter}
-            keyword={keyword}
             selectedDishId={state.selectedDishId}
             activeLibraryRole={activeLibraryRole}
             cuisineOptions={cuisineOptions}
@@ -362,6 +292,9 @@ export function MenuApp() {
             roleOrder={roleOrder}
             libraryReviewPrompt={libraryReviewPrompt}
             libraryExportJson={libraryExportJson}
+            cuisineDistribution={cuisineDistribution}
+            changedDishCount={changedDishCount}
+            roleLibraryCount={roleLibraryCount}
             onDishSelect={(id) => dispatch({ type: "select", payload: id })}
             onDishChange={(id, field, value) =>
               dispatch({ type: "update", payload: { id, field, value } })
@@ -369,14 +302,6 @@ export function MenuApp() {
             onDishReplace={(id, option) =>
               dispatch({ type: "replaceFromLibrary", payload: { id, option } })
             }
-            onCuisineFilterChange={setCuisineFilter}
-            onPremadeFilterChange={setPremadeFilter}
-            onKeywordChange={setKeyword}
-            onClearFilters={() => {
-              setKeyword("");
-              setCuisineFilter("");
-              setPremadeFilter("");
-            }}
             onLibraryRoleChange={setActiveLibraryRole}
             onLibraryAdd={(role) =>
               setLibraryState((current) =>
@@ -391,9 +316,10 @@ export function MenuApp() {
             onLibraryCopy={copyText}
             onOpenGuestPreview={() => setIsGuestPreviewOpen(true)}
             onOpenOutput={() => setIsOutputOpen(true)}
+            onResetMenu={() => dispatch({ type: "reset", payload: defaultMenu })}
           />
         ) : activeTab === "daily" ? (
-          <DailyCookingContent activeCuisine={activeCuisine} />
+          <DailyCookingContent />
         ) : (
           <KnowledgeToolsContent
             copiedTarget={copiedTarget}
