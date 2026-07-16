@@ -197,3 +197,7 @@ export type MenuAction =
       type: "reset";
       payload: MenuDish[];
     };
+
+export type MainTab = "banquet" | "daily";
+
+export type CuisineType = "chinese" | "japanese" | "korean" | "western";

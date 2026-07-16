@@ -10,10 +10,6 @@ import {
   cloneRoleDishLibrary,
   createEmptyRoleDishOption,
 } from "@/data/role-dish-library";
-import { DishCard } from "@/components/dish-card";
-import { GuestPreview } from "@/components/guest-preview";
-import { LibraryManager } from "@/components/library-manager";
-import { OutputPanel } from "@/components/output-panel";
 import { StatCard } from "@/components/stat-card";
 import { ThawGuideModal } from "@/components/thaw-guide-modal";
 import { CulinaryGuideModal } from "@/components/culinary-guide-modal";
@@ -26,7 +22,7 @@ import {
   daxiGoldenList,
   daxiSkipList,
 } from "@/data/daxi-harbor-guide";
-import type { CopyTarget } from "@/types/menu";
+import type { CopyTarget, MainTab, CuisineType } from "@/types/menu";
 import {
   buildCookingGuideText,
   buildCookingReminderText,
@@ -43,7 +39,6 @@ import {
   buildThawReminderText,
   buildThawSummary,
   ensureStorageVersion,
-  filterDishes,
   getChangedDishCount,
   getCookingGuides,
   getCuisineDistribution,
@@ -59,6 +54,14 @@ import {
   sanitizeRoleDishLibrary,
   updateRoleDishOption,
 } from "@/utils/menu";
+import { MainTab } from "@/components/main-tab";
+import { CuisineSubTab } from "@/components/cuisine-sub-tab";
+import { KitchenToolboxDrawer } from "@/components/kitchen-toolbox-drawer";
+import { DailyCookingContent } from "@/components/daily-cooking-content";
+import { BanquetContent } from "@/components/banquet-content";
+import { OutputPanel } from "@/components/output-panel";
+import { GuestPreview } from "@/components/guest-preview";
+import { LibraryManager } from "@/components/library-manager";
 
 const createDefaultLibraryState = () => cloneRoleDishLibrary();
 const CURRENT_STORAGE_VERSION = buildStorageVersion(defaultMenu, createDefaultLibraryState());
@@ -96,6 +99,9 @@ export function MenuApp() {
 
   const roleOrder = defaultMenu.map((dish) => dish.role);
 
+  const [activeTab, setActiveTab] = useState<MainTab>("banquet");
+  const [activeCuisine, setActiveCuisine] = useState<CuisineType>("chinese");
+
   useEffect(() => {
     try {
       ensureStorageVersion(window.localStorage, CURRENT_STORAGE_VERSION);
@@ -128,16 +134,6 @@ export function MenuApp() {
 
     window.localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(libraryState));
   }, [hasHydrated, libraryState]);
-
-  const visibleDishes = useMemo(
-    () =>
-      filterDishes(state.dishes, {
-        cuisine: cuisineFilter,
-        premadeLevel: premadeFilter,
-        keyword,
-      }),
-    [cuisineFilter, keyword, premadeFilter, state.dishes],
-  );
 
   const cuisineDistribution = useMemo(
     () => getCuisineDistribution(state.dishes),
@@ -365,181 +361,76 @@ export function MenuApp() {
       </section>
 
       <section className="space-y-6">
-        <div className="rounded-[30px] border border-[color:var(--line)] bg-[color:var(--surface)] p-5 backdrop-blur-xl">
-          <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
-            <label className="relative block">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--muted)]" />
-              <input
-                value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-                placeholder="搜尋宴席地位、菜名、菜系或預製度"
-                className="w-full rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-soft)] py-3 pr-4 pl-11 text-sm text-[color:var(--foreground)] outline-none transition placeholder:text-[color:var(--muted)] focus:border-[color:var(--accent)]"
-              />
-            </label>
-
-            <select
-              value={cuisineFilter}
-              onChange={(event) => setCuisineFilter(event.target.value)}
-              className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-soft)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--accent)]"
-            >
-              <option value="">全部菜系</option>
-              {cuisineOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={premadeFilter}
-              onChange={(event) => setPremadeFilter(event.target.value)}
-              className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-soft)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--accent)]"
-            >
-              <option value="">全部預製度</option>
-              {premadeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="button"
-              onClick={() => {
-                setKeyword("");
-                setCuisineFilter("");
-                setPremadeFilter("");
-              }}
-              className="btn-muted inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm transition"
-            >
-              <Ban className="h-4 w-4" />
-              清除
-            </button>
-          </div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <MainTab activeTab={activeTab} onTabChange={setActiveTab} />
+          {activeTab === "banquet" && (
+            <CuisineSubTab activeCuisine={activeCuisine} onCuisineChange={setActiveCuisine} />
+          )}
         </div>
 
-        <div className="rounded-[30px] border border-[color:var(--line)] bg-[color:var(--surface)] p-5 backdrop-blur-xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
-                工作台模式
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[color:var(--foreground)]">
-                先編排菜單，再管理菜庫
-              </h2>
-              <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
-                工作輸出已改為抽屜式收納，主畫面留給菜色調整與候選菜庫維護，不再被長篇指令與 JSON 擠壓。
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setIsCulinaryGuideOpen(true)}
-                className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <Utensils className="h-4 w-4" />
-                職人技術修煉手冊
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsDaxiGuideOpen(true)}
-                className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                大溪漁港採購指南
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsThawGuideOpen(true)}
-                className="btn-accent inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <CookingPot className="h-4 w-4" />
-                查看廚房戰情室秘笈
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsGuestPreviewOpen(true)}
-                className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <Eye className="h-4 w-4" />
-                查看賓客版
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsOutputOpen(true)}
-                className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <PanelRightOpen className="h-4 w-4" />
-                打開工作輸出
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4">
-          {visibleDishes.map((dish) => (
-            <DishCard
-              key={dish.id}
-              dish={dish}
-              roleOptions={libraryState[dish.role] ?? []}
-              isSelected={state.selectedDishId === dish.id}
-              onSelect={(id) => dispatch({ type: "select", payload: id })}
-              onChange={(id, field, value) =>
-                dispatch({ type: "update", payload: { id, field, value } })
-              }
-              onReplace={(id, option) =>
-                dispatch({ type: "replaceFromLibrary", payload: { id, option } })
-              }
-            />
-          ))}
-
-          {!visibleDishes.length ? (
-            <div className="rounded-[30px] border border-dashed border-[color:var(--line-strong)] bg-[color:var(--surface-soft)] p-8 text-center text-sm leading-7 text-[color:var(--muted)]">
-              沒有符合條件的菜色，請放寬搜尋關鍵字或切換篩選條件。
-            </div>
-          ) : null}
-        </div>
-
-        <LibraryManager
-          roles={roleOrder}
-          activeRole={activeLibraryRole}
-          library={libraryState}
-          copiedTarget={copiedTarget}
-          onRoleChange={setActiveLibraryRole}
-          onAdd={(role) =>
-            setLibraryState((current) =>
-              addRoleDishOption(current, role, createEmptyRoleDishOption(role)),
-            )
-          }
-          onDelete={(role, libraryId) =>
-            setLibraryState((current) => removeRoleDishOption(current, role, libraryId))
-          }
-          onUpdate={handleLibraryOptionUpdate}
-          onApply={applyLibraryOption}
-          onCopy={copyText}
-          libraryReviewPrompt={libraryReviewPrompt}
-          libraryExportJson={libraryExportJson}
-          poolWarnings={activeLibraryWarnings}
-          diversityRadar={activeLibraryRadar}
-        />
-
-        <div className="rounded-[30px] border border-[color:var(--line)] bg-[color:var(--surface)] p-5 backdrop-blur-xl">
-          <p className="text-[11px] uppercase tracking-[0.32em] text-[color:var(--accent-soft)]">
-            編排提醒
-          </p>
-          <div className="mt-4 grid gap-3 text-sm leading-7 text-[color:var(--muted)] lg:grid-cols-3">
-            <p className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-soft)] px-4 py-3">
-              {thawSummary}
-            </p>
-            <p className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-soft)] px-4 py-3">
-              {cookingSummary}
-            </p>
-            <p className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-soft)] px-4 py-3">
-              當前選定的地位已有 {activeLibraryCount} 筆候選菜；需要逐道退冰與烹調順序時，可打開工作輸出查看完整提醒。
-            </p>
-          </div>
-        </div>
+        {activeTab === "banquet" ? (
+          <BanquetContent
+            dishes={state.dishes}
+            libraryState={libraryState}
+            cuisineFilter={cuisineFilter}
+            premadeFilter={premadeFilter}
+            keyword={keyword}
+            selectedDishId={state.selectedDishId}
+            activeLibraryRole={activeLibraryRole}
+            cuisineOptions={cuisineOptions}
+            premadeOptions={premadeOptions}
+            copiedTarget={copiedTarget}
+            activeLibraryCount={activeLibraryCount}
+            activeLibraryWarnings={activeLibraryWarnings}
+            activeLibraryRadar={activeLibraryRadar}
+            roleOrder={roleOrder}
+            libraryReviewPrompt={libraryReviewPrompt}
+            libraryExportJson={libraryExportJson}
+            onDishSelect={(id) => dispatch({ type: "select", payload: id })}
+            onDishChange={(id, field, value) =>
+              dispatch({ type: "update", payload: { id, field, value } })
+            }
+            onDishReplace={(id, option) =>
+              dispatch({ type: "replaceFromLibrary", payload: { id, option } })
+            }
+            onCuisineFilterChange={setCuisineFilter}
+            onPremadeFilterChange={setPremadeFilter}
+            onKeywordChange={setKeyword}
+            onClearFilters={() => {
+              setKeyword("");
+              setCuisineFilter("");
+              setPremadeFilter("");
+            }}
+            onLibraryRoleChange={setActiveLibraryRole}
+            onLibraryAdd={(role) =>
+              setLibraryState((current) =>
+                addRoleDishOption(current, role, createEmptyRoleDishOption(role)),
+              )
+            }
+            onLibraryDelete={(role, libraryId) =>
+              setLibraryState((current) => removeRoleDishOption(current, role, libraryId))
+            }
+            onLibraryUpdate={handleLibraryOptionUpdate}
+            onLibraryApply={applyLibraryOption}
+            onLibraryCopy={copyText}
+            onOpenThawGuide={() => setIsThawGuideOpen(true)}
+            onOpenCulinaryGuide={() => setIsCulinaryGuideOpen(true)}
+            onOpenDaxiGuide={() => setIsDaxiGuideOpen(true)}
+            onOpenCookingGuide={() => setIsThawGuideOpen(true)}
+            onOpenGuestPreview={() => setIsGuestPreviewOpen(true)}
+            onOpenOutput={() => setIsOutputOpen(true)}
+          />
+        ) : (
+          <DailyCookingContent activeCuisine={activeCuisine} />
+        )}
       </section>
+
+      <KitchenToolboxDrawer
+        onOpenThawGuide={() => setIsThawGuideOpen(true)}
+        onOpenCulinaryGuide={() => setIsCulinaryGuideOpen(true)}
+        onOpenDaxiGuide={() => setIsDaxiGuideOpen(true)}
+        onOpenCookingGuide={() => setIsThawGuideOpen(true)}
+      />
 
       <OutputPanel
         summary={summary}
