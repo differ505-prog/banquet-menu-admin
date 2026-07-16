@@ -1,46 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Heart, BookOpen, ChevronDown, Check } from "lucide-react";
+import { Heart, ChevronDown } from "lucide-react";
 
 import {
   healthCookingSections,
-  healthCookingDifficultyLevels,
-  type HealthCookingDifficulty,
   type HealthCookingSection,
   type HealthCookingEntry,
 } from "@/data/health-cooking";
 
-const difficultyColors: Record<HealthCookingDifficulty, string> = {
-  entry: "text-[color:var(--accent)]",
-  intermediate: "text-[color:var(--accent-warm)]",
-  master: "text-[color:var(--accent-cool)]",
-};
-
-const difficultyBgColors: Record<HealthCookingDifficulty, string> = {
-  entry: "bg-[color:var(--accent)]/10 border-[color:var(--accent)]/25",
-  intermediate: "bg-[color:var(--accent-warm)]/10 border-[color:var(--accent-warm)]/25",
-  master: "bg-[color:var(--accent-cool)]/10 border-[color:var(--accent-cool)]/25",
-};
-
-function getDifficulty(entry: HealthCookingEntry): HealthCookingDifficulty {
-  const entryLabel = entry.label;
-  for (const level of healthCookingDifficultyLevels) {
-    if (level.dishes.some((d) => entryLabel.includes(d) || d.includes(entryLabel))) {
-      return level.level;
-    }
-  }
-  return "entry";
-}
-
 function EntryCard({ entry }: { entry: HealthCookingEntry }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const difficulty = getDifficulty(entry);
 
   return (
-    <div
-      className={`rounded-2xl border p-4 transition-all ${difficultyBgColors[difficulty]}`}
-    >
+    <div className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-4 transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
@@ -54,36 +27,31 @@ function EntryCard({ entry }: { entry: HealthCookingEntry }) {
           <p className="mt-1.5 text-xs leading-6 text-[color:var(--muted)]">
             {entry.coreTechnique}
           </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="shrink-0 rounded-full border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-2.5 py-1 text-[10px] text-[color:var(--muted)] transition-colors hover:border-[color:var(--accent)] hover:text-[color:var(--accent)]"
+        >
+          {isExpanded ? "收起" : "展開"}
+        </button>
+      </div>
+
+      {isExpanded && (
+        <div className="mt-4 space-y-3 border-t border-[color:var(--line)] pt-4">
           {entry.goldenRatio && (
-            <p className="mt-1.5 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)] px-3 py-1.5 text-xs text-[color:var(--accent)]">
+            <p className="rounded-xl border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-3 py-2 text-xs leading-6 text-[color:var(--accent)]">
               {entry.goldenRatio}
             </p>
           )}
           {entry.healthNote && (
-            <p className="mt-1.5 text-xs leading-5 text-[color:var(--muted)]">
+            <p className="text-xs leading-6 text-[color:var(--muted)]">
               {entry.healthNote}
             </p>
           )}
-        </div>
-        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-medium ${difficultyBgColors[difficulty]} ${difficultyColors[difficulty]}`}>
-          {healthCookingDifficultyLevels.find((l) => l.level === difficulty)?.label}
-        </span>
-      </div>
-
-      {entry.steps && (
-        <>
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-3 flex items-center gap-1.5 text-[11px] text-[color:var(--muted)] transition-colors hover:text-[color:var(--foreground)]"
-          >
-            <ChevronDown
-              className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-            />
-            {isExpanded ? "收起步驟" : "展開職人步驟"}
-          </button>
-          {isExpanded && (
-            <div className="mt-3 space-y-2">
+          {entry.steps && (
+            <div className="space-y-2">
               {entry.steps.split("\n").map((step, i) => (
                 <div key={i} className="flex gap-2.5">
                   <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--accent)]" />
@@ -92,20 +60,19 @@ function EntryCard({ entry }: { entry: HealthCookingEntry }) {
               ))}
             </div>
           )}
-        </>
-      )}
-
-      {entry.troubleshooting && (
-        <div className="mt-3 rounded-xl border border-[color:var(--accent-warm)]/20 bg-[color:var(--accent-warm)]/8 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-[color:var(--accent-warm)]">
-            Troubleshooting
-          </p>
-          <p className="mt-1 text-xs font-medium text-[color:var(--foreground)]">
-            {entry.troubleshooting.problem}
-          </p>
-          <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
-            {entry.troubleshooting.solution}
-          </p>
+          {entry.troubleshooting && (
+            <div className="rounded-xl border border-[color:var(--accent-warm)]/20 bg-[color:var(--accent-warm)]/8 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[color:var(--accent-warm)]">
+                Troubleshooting
+              </p>
+              <p className="mt-1 text-xs font-medium text-[color:var(--foreground)]">
+                {entry.troubleshooting.problem}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
+                {entry.troubleshooting.solution}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -169,23 +136,6 @@ export function DailyCookingContent() {
         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[color:var(--muted)]">
           正統性・健康度・廚藝價值。每一道都是經典技術的練習教材，拒絕替代品，只給你真正值得做的菜。
         </p>
-      </div>
-
-      {/* Difficulty Levels Summary */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        {healthCookingDifficultyLevels.map((level) => (
-          <div
-            key={level.level}
-            className={`rounded-2xl border p-4 ${difficultyBgColors[level.level]}`}
-          >
-            <p className={`text-[10px] uppercase tracking-wider ${difficultyColors[level.level]}`}>
-              {level.label}
-            </p>
-            <p className="mt-1 text-sm font-medium text-[color:var(--foreground)]">
-              {level.dishes.join(" · ")}
-            </p>
-          </div>
-        ))}
       </div>
 
       {/* Category Sections */}
