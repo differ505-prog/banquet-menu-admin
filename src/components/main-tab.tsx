@@ -1,6 +1,6 @@
 "use client";
 
-import { UtensilsCrossed, Heart } from "lucide-react";
+import { UtensilsCrossed, Heart, BookOpen } from "lucide-react";
 import type { MainTabKey } from "@/types/menu";
 
 interface MainTabProps {
@@ -16,8 +16,13 @@ const tabs: { key: MainTabKey; label: string; icon: React.ReactNode }[] = [
   },
   {
     key: "daily",
-    label: "日養自煮",
+    label: "健康自煮",
     icon: <Heart className="h-4 w-4" aria-hidden="true" />,
+  },
+  {
+    key: "knowledge",
+    label: "技法與備料",
+    icon: <BookOpen className="h-4 w-4" aria-hidden="true" />,
   },
 ];
 

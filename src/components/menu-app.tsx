@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
-import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, ShoppingBag, Sparkles, Utensils } from "lucide-react";
+import { Ban, CookingPot, Eye, PanelRightOpen, RefreshCcw, Search, Sparkles, Utensils } from "lucide-react";
 
 import { defaultMenu } from "@/data/default-menu";
 import {
@@ -56,9 +56,9 @@ import {
 } from "@/utils/menu";
 import { MainTab } from "@/components/main-tab";
 import { CuisineSubTab } from "@/components/cuisine-sub-tab";
-import { KitchenToolboxDrawer } from "@/components/kitchen-toolbox-drawer";
 import { DailyCookingContent } from "@/components/daily-cooking-content";
 import { BanquetContent } from "@/components/banquet-content";
+import { KnowledgeToolsContent } from "@/components/knowledge-tools-content";
 import { OutputPanel } from "@/components/output-panel";
 import { GuestPreview } from "@/components/guest-preview";
 import { LibraryManager } from "@/components/library-manager";
@@ -254,30 +254,6 @@ export function MenuApp() {
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => setIsCulinaryGuideOpen(true)}
-                className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <Utensils className="h-4 w-4" />
-                職人技術修煉手冊
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsDaxiGuideOpen(true)}
-                className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                大溪漁港採購指南
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsThawGuideOpen(true)}
-                className="btn-accent inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-              >
-                <CookingPot className="h-4 w-4" />
-                查看廚房戰情室秘笈
-              </button>
-              <button
-                type="button"
                 onClick={() => setIsGuestPreviewOpen(true)}
                 className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
               >
@@ -413,24 +389,21 @@ export function MenuApp() {
             onLibraryUpdate={handleLibraryOptionUpdate}
             onLibraryApply={applyLibraryOption}
             onLibraryCopy={copyText}
-            onOpenThawGuide={() => setIsThawGuideOpen(true)}
-            onOpenCulinaryGuide={() => setIsCulinaryGuideOpen(true)}
-            onOpenDaxiGuide={() => setIsDaxiGuideOpen(true)}
-            onOpenCookingGuide={() => setIsThawGuideOpen(true)}
             onOpenGuestPreview={() => setIsGuestPreviewOpen(true)}
             onOpenOutput={() => setIsOutputOpen(true)}
           />
-        ) : (
+        ) : activeTab === "daily" ? (
           <DailyCookingContent activeCuisine={activeCuisine} />
+        ) : (
+          <KnowledgeToolsContent
+            copiedTarget={copiedTarget}
+            onCopy={copyText}
+            onOpenThawGuide={() => setIsThawGuideOpen(true)}
+            onOpenCulinaryGuide={() => setIsCulinaryGuideOpen(true)}
+            onOpenSeafoodGuide={() => setIsDaxiGuideOpen(true)}
+          />
         )}
       </section>
-
-      <KitchenToolboxDrawer
-        onOpenThawGuide={() => setIsThawGuideOpen(true)}
-        onOpenCulinaryGuide={() => setIsCulinaryGuideOpen(true)}
-        onOpenDaxiGuide={() => setIsDaxiGuideOpen(true)}
-        onOpenCookingGuide={() => setIsThawGuideOpen(true)}
-      />
 
       <OutputPanel
         summary={summary}

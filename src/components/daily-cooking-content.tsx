@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Sparkles, Leaf, Shield, Brain, Moon } from "lucide-react";
+import { Heart, Sparkles, Leaf, Shield, Brain, Moon, UtensilsCrossed } from "lucide-react";
 import type { CuisineType } from "@/types/menu";
 
 interface DailyCookingContentProps {

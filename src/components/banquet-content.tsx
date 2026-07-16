@@ -41,10 +41,6 @@ interface BanquetContentProps {
   onLibraryUpdate: (role: string, libraryId: string, field: "dishName" | "cuisine" | "premadeLevel", value: string) => void;
   onLibraryApply: (option: RoleDishOption) => void;
   onLibraryCopy: (value: string, target: CopyTarget) => void;
-  onOpenThawGuide: () => void;
-  onOpenCulinaryGuide: () => void;
-  onOpenDaxiGuide: () => void;
-  onOpenCookingGuide: () => void;
   onOpenGuestPreview: () => void;
   onOpenOutput: () => void;
 }
@@ -80,10 +76,6 @@ export function BanquetContent(props: BanquetContentProps) {
     onLibraryUpdate,
     onLibraryApply,
     onLibraryCopy,
-    onOpenThawGuide,
-    onOpenCulinaryGuide,
-    onOpenDaxiGuide,
-    onOpenCookingGuide,
     onOpenGuestPreview,
     onOpenOutput,
   } = props;
@@ -167,27 +159,6 @@ export function BanquetContent(props: BanquetContentProps) {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={onOpenCulinaryGuide}
-              className="btn-primary-cool inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-            >
-              職人技術修煉手冊
-            </button>
-            <button
-              type="button"
-              onClick={onOpenDaxiGuide}
-              className="btn-primary-warm inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-            >
-              大溪漁港採購指南
-            </button>
-            <button
-              type="button"
-              onClick={onOpenThawGuide}
-              className="btn-accent inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition"
-            >
-              查看廚房戰情室秘笈
-            </button>
             <button
               type="button"
               onClick={onOpenGuestPreview}
