@@ -22,7 +22,7 @@ import {
   daxiGoldenList,
   daxiSkipList,
 } from "@/data/daxi-harbor-guide";
-import type { CopyTarget, MainTab, CuisineType } from "@/types/menu";
+import type { CopyTarget, MainTabKey, CuisineType } from "@/types/menu";
 import {
   buildCookingGuideText,
   buildCookingReminderText,
@@ -99,7 +99,7 @@ export function MenuApp() {
 
   const roleOrder = defaultMenu.map((dish) => dish.role);
 
-  const [activeTab, setActiveTab] = useState<MainTab>("banquet");
+  const [activeTab, setActiveTab] = useState<MainTabKey>("banquet");
   const [activeCuisine, setActiveCuisine] = useState<CuisineType>("chinese");
 
   useEffect(() => {

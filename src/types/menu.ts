@@ -198,6 +198,6 @@ export type MenuAction =
       payload: MenuDish[];
     };
 
-export type MainTab = "banquet" | "daily";
+export type MainTabKey = "banquet" | "daily";
 
 export type CuisineType = "chinese" | "japanese" | "korean" | "western";

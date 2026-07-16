@@ -1,14 +1,14 @@
 "use client";
 
 import { UtensilsCrossed, Heart } from "lucide-react";
-import type { MainTab } from "@/types/menu";
+import type { MainTabKey } from "@/types/menu";
 
 interface MainTabProps {
-  activeTab: MainTab;
-  onTabChange: (tab: MainTab) => void;
+  activeTab: MainTabKey;
+  onTabChange: (tab: MainTabKey) => void;
 }
 
-const tabs: { key: MainTab; label: string; icon: React.ReactNode }[] = [
+const tabs: { key: MainTabKey; label: string; icon: React.ReactNode }[] = [
   {
     key: "banquet",
     label: "待客宴",
